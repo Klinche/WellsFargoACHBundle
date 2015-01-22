@@ -1,0 +1,46 @@
+{
+  "name": "dabsquared/wells-fargo-ach-bundle",
+  "type": "library",
+  "description": "This bundle is used to help communicate with the Wells Fargo ACH Service",
+  "keywords": [
+    "wells fargo",
+    "gateway",
+    "merchant",
+    "wells",
+    "pay",
+    "payment",
+    "ach",
+    "fargo"
+  ],
+  "homepage": "https://github.com/DABSquared/WellsFargoACHBundle",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Daniel Brooks",
+      "email": "daniel_brooks@dabsquared.com"
+    },
+    {
+      "name": "DABSquared",
+      "homepage": "https://github.com/DABSquared"
+    }
+  ],
+  "autoload": {
+    "psr-4": { "DABSquared\\WellsFargoACHBundle\\" : "src/" }
+  },
+  "require": {
+    "php": ">=5.4.0",
+    "ext-ssh2": "*",
+    "jms/di-extra-bundle": "@stable"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "@stable",
+    "fabpot/php-cs-fixer": "@stable",
+    "phploc/phploc": "@stable",
+    "pdepend/pdepend": "@stable",
+    "phpmd/phpmd": "@stable",
+    "squizlabs/php_codesniffer": "@stable",
+    "sebastian/phpcpd": "@stable",
+    "theseer/phpdox": "@stable",
+    "mayflower/php-codebrowser": "@stable"
+  }
+}
