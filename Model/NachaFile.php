@@ -198,6 +198,11 @@ class NACHAFile {
         return $this;
     }
 
+    public function getFileModifier()
+    {
+        return $this->filemodifier;
+    }
+
     public function setServiceClassCode($scc)
     {
         $this->scc = $scc;
