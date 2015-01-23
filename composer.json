@@ -1,6 +1,6 @@
 {
   "name": "dabsquared/wells-fargo-ach-bundle",
-  "type": "library",
+  "type": "symfony-bundle",
   "description": "This bundle is used to help communicate with the Wells Fargo ACH Service",
   "keywords": [
     "wells fargo",
@@ -30,7 +30,8 @@
   "require": {
     "php": ">=5.4.0",
     "ext-ssh2": "*",
-    "jms/di-extra-bundle": "@stable"
+    "jms/di-extra-bundle": "@stable",
+    "symfony/symfony": ">=2.5"
   },
   "require-dev": {
     "phpunit/phpunit": "@stable",
@@ -42,5 +43,6 @@
     "sebastian/phpcpd": "@stable",
     "theseer/phpdox": "@stable",
     "mayflower/php-codebrowser": "@stable"
-  }
+  },
+  "target-dir": "DABSquared/WellsFargoACHBundle"
 }
