@@ -9,7 +9,7 @@
 namespace WellsFargo\ACHBundle\Model;
 
 
-class NachaPaymentInfo {
+class NACHAPaymentInfo {
     /** @var string  */
     private $transCode = null;
 

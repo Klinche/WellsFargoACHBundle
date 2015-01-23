@@ -8,7 +8,7 @@
 
 namespace WellsFargo\ACHBundle\Model;
 
-class NachaFile {
+class NACHAFile {
 
     const SAVINGS = 'SAVINGS';
     const CHECKING = 'CHECKING';
@@ -69,7 +69,7 @@ class NachaFile {
     public $fileContents = '';
     public $discretionaryData = '';
     private $applicationId = '';
-    private $timezone = 'America/Los_Angeles';
+    private $timezone = 'PST8PDT';
 
     /**
      */
