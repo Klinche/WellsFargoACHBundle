@@ -40,8 +40,6 @@ class Type6Record
     /** @var string|null */
     private $traceNumber = null;
 
-    /** @var array */
-    private $addendaRecords = array();
 
     public function __construct()
     {

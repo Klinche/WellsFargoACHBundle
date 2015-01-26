@@ -46,6 +46,34 @@ class Type1Record
     /** @var string|null */
     private $referenceCode = null;
 
+    /** @var null|string  */
+    private $errorCode = null;
+
+
+    private $errorCodes = array(
+        '1020' => 'Rejected in pre-edit',
+        '1030' => 'File rejected for control errors in pre-edit',
+        '1040' => 'File rejected due to control errors',
+        '1050' => 'File rejected due to file identification errors',
+        '1060' => 'Rejected due to duplicate presence',
+        '1070' => 'Reject due to risk',
+        '1505' => 'Immediate destination not found',
+        '1507' => 'Immediate destination is not numeric',
+        '1510' => 'File ID was modified according to customer setup',
+        '1512' => 'Special rules expiration date has passed',
+        '1520' => 'File ID modifier contained a space',
+        '1525' => 'File ID modifier is not alphanumeric as required by Fed',
+        '1530' => 'Create date was non-numeric or zero',
+        '1540' => 'Create date contained incorrect format',
+        '1550' => 'Priority code was not numeric',
+        '1560' => 'Immediate destination name was spaces',
+        '1561' => 'Immediate origin name is spaces',
+        '1570' => 'Record length not 94 bytes (94 characters)',
+        '1580' => 'Record length was not numeric',
+        '1590' => 'Blocking factor not 10',
+        '1600' => 'Blocking factor was not numeric',
+        '1610' => 'Format code was not 1',
+    );
 
     public function __construct()
     {
@@ -242,6 +270,9 @@ class Type1Record
     public function setCompanyName($companyName)
     {
         $this->companyName = $companyName;
+        if(substr($this->companyName,0, 4) == 'REJ0') {
+            $this->setErrorCode(substr($this->companyName, 4, 4));
+        }
     }
 
     /**
@@ -258,5 +289,31 @@ class Type1Record
     public function setReferenceCode($referenceCode)
     {
         $this->referenceCode = $referenceCode;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getErrorCode()
+    {
+        return $this->errorCode;
+    }
+
+    /**
+     * @param null|string $errorCode
+     */
+    public function setErrorCode($errorCode)
+    {
+        $this->errorCode = $errorCode;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getErrorDescription() {
+        if(is_null($this->getErrorCode())) {
+            return null;
+        }
+        return $this->errorCodes[$this->getErrorCode()];
     }
 }
