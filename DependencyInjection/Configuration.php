@@ -26,6 +26,7 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
+
         $treeBuilder = new TreeBuilder();
         $this->root = $treeBuilder->root("wells_fargo_ach");
         $this->root
