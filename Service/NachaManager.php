@@ -13,7 +13,7 @@ use WellsFargo\ACHBundle\Model\NACHAFile;
 use WellsFargo\ACHBundle\Model\NACHAOriginationRejectFile;
 
 
-class NachaManager {
+class NACHAManager {
 
     /** @var  string  */
     private $bankrt;
