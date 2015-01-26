@@ -93,6 +93,10 @@ class Type1Record
         $this->setOriginationBank(substr($line, 40, 23));
         $this->setCompanyName(substr($line, 63, 23));
         $this->setReferenceCode(substr($line, 86, 8));
+
+        if(substr($line, 79, 4) == 'REJ0') {
+            $this->setErrorCode(substr($line, 83, 4));
+        }
     }
 
 
@@ -270,9 +274,6 @@ class Type1Record
     public function setCompanyName($companyName)
     {
         $this->companyName = $companyName;
-        if(substr($this->companyName,0, 4) == 'REJ0') {
-            $this->setErrorCode(substr($this->companyName, 4, 4));
-        }
     }
 
     /**

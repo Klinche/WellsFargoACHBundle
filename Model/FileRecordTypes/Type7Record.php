@@ -39,6 +39,10 @@ class Type7Record
         $this->setPaymentRelatedInformation(substr($line, 3, 80));
         $this->setAddendaSequenceNumber(substr($line, 83, 4));
         $this->setEntryDetailSequenceNumber(substr($line, 87, 7));
+
+        if(substr($line, 79, 4) == 'REJ0') {
+            $this->setErrorCode(substr($line, 83, 4));
+        }
     }
 
     /**
@@ -103,9 +107,6 @@ class Type7Record
     public function setEntryDetailSequenceNumber($entryDetailSequenceNumber)
     {
         $this->entryDetailSequenceNumber = $entryDetailSequenceNumber;
-        if(substr($this->entryDetailSequenceNumber,0, 4) == 'REJ0') {
-            $this->setErrorCode(substr($this->entryDetailSequenceNumber, 4, 4));
-        }
     }
 
     /**

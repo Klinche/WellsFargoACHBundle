@@ -63,6 +63,10 @@ class Type8Record
         $this->setBlank(substr($line, 73, 6));
         $this->setWellsFargoRoutingNumber(substr($line, 79, 8));
         $this->setBatchNumber(substr($line, 87, 7));
+
+        if(substr($line, 79, 4) == 'REJ0') {
+            $this->setErrorCode(substr($line, 83, 4));
+        }
     }
 
     /**
@@ -207,9 +211,6 @@ class Type8Record
     public function setWellsFargoRoutingNumber($wellsFargoRoutingNumber)
     {
         $this->wellsFargoRoutingNumber = $wellsFargoRoutingNumber;
-        if(substr($this->wellsFargoRoutingNumber,0, 4) == 'REJ0') {
-            $this->setErrorCode(substr($this->wellsFargoRoutingNumber, 4, 4));
-        }
     }
 
     /**

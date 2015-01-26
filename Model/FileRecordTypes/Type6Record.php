@@ -63,6 +63,10 @@ class Type6Record
         $this->setDiscretionaryData(substr($line, 76, 2));
         $this->setAddendaRecordIndicator(substr($line, 78, 1));
         $this->setTraceNumber(substr($line, 79, 15));
+
+        if(substr($line, 79, 4) == 'REJ0') {
+            $this->setErrorCode(substr($line, 83, 4));
+        }
     }
 
     /**
@@ -223,9 +227,6 @@ class Type6Record
     public function setTraceNumber($traceNumber)
     {
         $this->traceNumber = $traceNumber;
-        if(substr($this->traceNumber,0, 4) == 'REJ0') {
-            $this->setErrorCode(substr($this->traceNumber, 4, 4));
-        }
     }
 
     /**
