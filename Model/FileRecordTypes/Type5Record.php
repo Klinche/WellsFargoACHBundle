@@ -46,6 +46,12 @@ class Type5Record
     /** @var string|null */
     private $batchNumber = null;
 
+    /** @var null|string  */
+    private $errorCode = null;
+
+    private $errorCodes = array(
+        '5010' => 'Batch rejected due to edits in pre-edit',
+    );
 
     public function __construct()
     {
@@ -241,6 +247,9 @@ class Type5Record
     public function setWellsFargoRoutingNumber($wellsFargoRoutingNumber)
     {
         $this->wellsFargoRoutingNumber = $wellsFargoRoutingNumber;
+        if(substr($this->wellsFargoRoutingNumber,0, 4) == 'REJ0') {
+            $this->setErrorCode(substr($this->wellsFargoRoutingNumber, 4, 4));
+        }
     }
 
     /**
@@ -257,5 +266,36 @@ class Type5Record
     public function setBatchNumber($batchNumber)
     {
         $this->batchNumber = $batchNumber;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getErrorCode()
+    {
+        return $this->errorCode;
+    }
+
+    /**
+     * @param null|string $errorCode
+     */
+    public function setErrorCode($errorCode)
+    {
+        $this->errorCode = $errorCode;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getErrorDescription() {
+        if(is_null($this->getErrorCode())) {
+            return null;
+        }
+
+        if(!array_key_exists($this->getErrorCode(), $this->errorCodes)) {
+            return 'Unknown Error';
+        }
+
+        return $this->errorCodes[$this->getErrorCode()];
     }
 }

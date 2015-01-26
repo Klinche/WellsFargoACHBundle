@@ -314,6 +314,11 @@ class Type1Record
         if(is_null($this->getErrorCode())) {
             return null;
         }
+
+        if(!array_key_exists($this->getErrorCode(), $this->errorCodes)) {
+            return 'Unknown Error';
+        }
+
         return $this->errorCodes[$this->getErrorCode()];
     }
 }

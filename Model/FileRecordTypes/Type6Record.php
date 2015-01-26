@@ -40,6 +40,12 @@ class Type6Record
     /** @var string|null */
     private $traceNumber = null;
 
+    /** @var null|string  */
+    private $errorCode = null;
+
+    private $errorCodes = array(
+        '6001' => 'Receiving DFI ID not found',
+    );
 
     public function __construct()
     {
@@ -217,5 +223,39 @@ class Type6Record
     public function setTraceNumber($traceNumber)
     {
         $this->traceNumber = $traceNumber;
+        if(substr($this->traceNumber,0, 4) == 'REJ0') {
+            $this->setErrorCode(substr($this->traceNumber, 4, 4));
+        }
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getErrorCode()
+    {
+        return $this->errorCode;
+    }
+
+    /**
+     * @param null|string $errorCode
+     */
+    public function setErrorCode($errorCode)
+    {
+        $this->errorCode = $errorCode;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getErrorDescription() {
+        if(is_null($this->getErrorCode())) {
+            return null;
+        }
+
+        if(!array_key_exists($this->getErrorCode(), $this->errorCodes)) {
+            return 'Unknown Error';
+        }
+
+        return $this->errorCodes[$this->getErrorCode()];
     }
 }

@@ -22,6 +22,13 @@ class Type7Record
     /** @var string|null */
     private $entryDetailSequenceNumber = null;
 
+    /** @var null|string  */
+    private $errorCode = null;
+
+    private $errorCodes = array(
+        '7001' => 'CCD – addenda type code 01 on a received file',
+    );
+
     public function __construct()
     {
     }
@@ -96,5 +103,39 @@ class Type7Record
     public function setEntryDetailSequenceNumber($entryDetailSequenceNumber)
     {
         $this->entryDetailSequenceNumber = $entryDetailSequenceNumber;
+        if(substr($this->entryDetailSequenceNumber,0, 4) == 'REJ0') {
+            $this->setErrorCode(substr($this->entryDetailSequenceNumber, 4, 4));
+        }
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getErrorCode()
+    {
+        return $this->errorCode;
+    }
+
+    /**
+     * @param null|string $errorCode
+     */
+    public function setErrorCode($errorCode)
+    {
+        $this->errorCode = $errorCode;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getErrorDescription() {
+        if(is_null($this->getErrorCode())) {
+            return null;
+        }
+
+        if(!array_key_exists($this->getErrorCode(), $this->errorCodes)) {
+            return 'Unknown Error';
+        }
+
+        return $this->errorCodes[$this->getErrorCode()];
     }
 }

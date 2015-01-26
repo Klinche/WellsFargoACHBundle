@@ -40,6 +40,13 @@ class Type8Record
     /** @var string|null */
     private $batchNumber = null;
 
+    /** @var null|string  */
+    private $errorCode = null;
+
+    private $errorCodes = array(
+        '8500' => 'Service class code invalid',
+    );
+
     public function __construct()
     {
     }
@@ -200,6 +207,9 @@ class Type8Record
     public function setWellsFargoRoutingNumber($wellsFargoRoutingNumber)
     {
         $this->wellsFargoRoutingNumber = $wellsFargoRoutingNumber;
+        if(substr($this->wellsFargoRoutingNumber,0, 4) == 'REJ0') {
+            $this->setErrorCode(substr($this->wellsFargoRoutingNumber, 4, 4));
+        }
     }
 
     /**
@@ -216,5 +226,36 @@ class Type8Record
     public function setBatchNumber($batchNumber)
     {
         $this->batchNumber = $batchNumber;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getErrorCode()
+    {
+        return $this->errorCode;
+    }
+
+    /**
+     * @param null|string $errorCode
+     */
+    public function setErrorCode($errorCode)
+    {
+        $this->errorCode = $errorCode;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getErrorDescription() {
+        if(is_null($this->getErrorCode())) {
+            return null;
+        }
+
+        if(!array_key_exists($this->getErrorCode(), $this->errorCodes)) {
+            return 'Unknown Error';
+        }
+
+        return $this->errorCodes[$this->getErrorCode()];
     }
 }
