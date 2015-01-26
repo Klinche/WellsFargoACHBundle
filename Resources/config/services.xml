@@ -15,9 +15,9 @@
             <argument>%wellsfargo.company_name%</argument>
             <argument>%wellsfargo.transmission_host%</argument>
             <argument>%wellsfargo.transmission_username%</argument>
-            <argument>%wellsfargo.transmission_private_key%</argument>
+            <argument>%wellsfargo.transmission_private_key_path%</argument>
             <argument>%wellsfargo.transmission_private_key_password%</argument>
-            <argument>%wellsfargo.transmission_public_key%</argument>
+            <argument>%wellsfargo.transmission_public_key_path%</argument>
             <argument>%wellsfargo.inbound_folder%</argument>
             <argument>%wellsfargo.outbound_folder%</argument>
             <argument>%wellsfargo.archive_out_folder%</argument>

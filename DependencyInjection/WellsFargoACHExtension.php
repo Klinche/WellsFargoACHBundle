@@ -47,7 +47,7 @@ class WellsFargoACHExtension extends Extension {
 
         $container->setParameter('wellsfargo.transmission_host', $config['transmission']['host']);
         $container->setParameter('wellsfargo.transmission_username', $config['transmission']['username']);
-        $container->setParameter('wellsfargo.transmission_private_key', $config['transmission']['private_key_path']);
+        $container->setParameter('wellsfargo.transmission_private_key_path', $config['transmission']['private_key_path']);
         $container->setParameter('wellsfargo.transmission_private_key_password', $config['transmission']['private_key_password']);
         $container->setParameter('wellsfargo.transmission_public_key_path', $config['transmission']['public_key_path']);
 
