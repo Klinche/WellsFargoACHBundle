@@ -30,7 +30,6 @@
   "require": {
     "php": ">=5.4.0",
     "ext-ssh2": "*",
-    "jms/di-extra-bundle": "@stable",
     "symfony/symfony": ">=2.5"
   },
   "require-dev": {

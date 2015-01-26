@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="wellsfargo.achbundle.nachamanager" class="WellsFargo\ACHBundle\Service\NACHAManager" public="true">
+            <argument>%wellsfargo.routing_number%</argument>
+            <argument>%wellsfargo.company_id%</argument>
+            <argument>%wellsfargo.application_id%</argument>
+            <argument>%wellsfargo.file_id%</argument>
+            <argument>%wellsfargo.originating_bank%</argument>
+            <argument>%wellsfargo.company_name%</argument>
+            <argument>%wellsfargo.transmission_host%</argument>
+            <argument>%wellsfargo.transmission_username%</argument>
+            <argument>%wellsfargo.transmission_private_key%</argument>
+            <argument>%wellsfargo.transmission_private_key_password%</argument>
+            <argument>%wellsfargo.transmission_public_key%</argument>
+            <argument>%wellsfargo.inbound_folder%</argument>
+            <argument>%wellsfargo.outbound_folder%</argument>
+            <argument>%wellsfargo.archive_out_folder%</argument>
+            <argument type="service" id="logger" />
+        </service>
+
+    </services>
+
+</container>
