@@ -8,12 +8,8 @@
 
 namespace WellsFargo\ACHBundle;
 
-use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpKernel\Bundle\Bundle as BaseBundle;
 
-class WellsFargoACHBundle extends Bundle
+class WellsFargoACHBundle extends BaseBundle
 {
-    public function build(ContainerBuilder $container)
-    {
-    }
 }
