@@ -7,11 +7,7 @@ use Symfony\Component\Config\Definition\Processor;
 
 class ConfigurationTest extends \PHPUnit_Framework_TestCase
 {
-    public function testDefaults()
-    {
-        $config = $this->process(array());
-        $this->assertEmpty($config);
-    }
+
     /**
      * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
      */
