@@ -31,6 +31,23 @@ class Type9Record
     /** @var string|null */
     private $filler = null;
 
+    private $errorCodes = array(
+        '9500' => 'Batch count not equal to 8 record accumulated count',
+        '9501' => 'Batch count not numeric',
+        '9502' => 'Block count not numeric',
+        '9503' => 'Entry/addenda count not equal to 8 record count accumulated',
+        '9504' => 'Entry/addenda count not numeric',
+        '9505' => 'Entry hash total not equal to 8 record hash accumulation',
+        '9506' => 'Entry hash total not numeric',
+        '9507' => 'Total debit entry dollar amount not equal to 8 record totals',
+        '9508' => 'Total debit entry dollar amount not numeric',
+        '9509' => 'Total credit entry dollar amount not equal to 8 record totals',
+        '9510' => 'Total credit entry dollar amount not numeric',
+        '9511' => 'Total number of invalid account numbers is greater than 50%',
+        '9512' => 'File amount exceeds file reporting debit or credit limits',
+        '9530' => 'File did not contain 9 record'
+    );
+
     public function __construct()
     {
     }

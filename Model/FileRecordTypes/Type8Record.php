@@ -45,6 +45,23 @@ class Type8Record
 
     private $errorCodes = array(
         '8500' => 'Service class code invalid',
+        '8501' => 'Service class code not equal to 5 record service class code',
+        '8502' => 'Service class code not numeric',
+        '8503' => 'Entry/addenda count not equal to actual accumulated',
+        '8504' => 'Entry/addenda count not numeric',
+        '8505' => 'Entry hash total not equal to accumulated 6 record totals of routing/transit numbers',
+        '8506' => 'Entry hash totals not numeric',
+        '8507' => 'Total debit entry dollar amount not equal to 6 record accumulation',
+        '8508' => 'Total debit entry dollar amount not numeric',
+        '8509' => 'Total credit entry dollar amount not equal to 6 record accumulation',
+        '8510' => 'Total credit entry dollar amount not numeric',
+        '8511' => 'Company ID not equal to 5 record company ID',
+        '8512' => 'Batch number not equal to 5 record batch number',
+        '8513' => 'Batch number not numeric',
+        '8514' => 'Batch amount exceeds company level processing limit',
+        '8515' => 'Debit only class contained credits; overridden to 200',
+        '8516' => 'Credit only class contained debits; overridden to 200',
+        '8530' => 'Batch did not contain an 8 record'
     );
 
     public function __construct()
