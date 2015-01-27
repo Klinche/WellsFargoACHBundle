@@ -22,8 +22,6 @@ class CompanyBatchRecord
     /** @var null|Type8Record */
     private $companyBatchControl = null;
 
-    private $error = false;
-
 
     public function __construct()
     {
@@ -111,5 +109,14 @@ class CompanyBatchRecord
     {
         $this->companyBatchControl = $companyBatchControl;
         $companyBatchControl->setCompanyBatchRecord($this);
+    }
+
+    /**
+     * Signals if the company batch record has a batch error. Does not indicate individual transaction errors.
+     *
+     * @return bool
+     */
+    public function isBatchError() {
+        return $this->getCompanyBatchControl()->isError() || $this->getCompanyBatchHeader()->isError();
     }
 }

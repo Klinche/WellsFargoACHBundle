@@ -24,7 +24,9 @@ class NACHAOriginationRejectFile {
 
     private $companyBatchRecords = array();
 
-    private $error = false;
+    /** @var null|string */
+    private $errorReason = null;
+
 
     public function __construct()
     {
@@ -41,18 +43,15 @@ class NACHAOriginationRejectFile {
                 case '1':
                     $type1Record = new Type1Record();
                     $type1Record->parseLine($line);
-                    $this->fileHeader = $type1Record;
+                    $this->setFileHeader($type1Record);
                     if ($type1Record->isError()) {
-                       $this->setError(true);
+                       $this->setErrorReason($type1Record->getErrorDescription());
                     }
                     break;
                 case '5':
                     $type5Record = new Type5Record();
                     $type5Record->parseLine($line);
                     $currentCompanyBatchRecord = $type5Record;
-                    if ($type5Record->isError()) {
-                        $this->setError(true);
-                    }
                     break;
                 case '6':
                     $type6Record = new Type6Record();
@@ -60,18 +59,12 @@ class NACHAOriginationRejectFile {
                     if (!is_null($currentCompanyBatchRecord)) {
                         $currentCompanyBatchRecord->addEntryDetailRecord($type6Record);
                     }
-                    if ($type6Record->isError()) {
-                        $this->setError(true);
-                    }
                     break;
                 case '7':
                     $type7Record = new Type7Record();
                     $type7Record->parseLine($line);
                     if (!is_null($currentCompanyBatchRecord)) {
                         $currentCompanyBatchRecord->addAddendaRecord($type7Record);
-                    }
-                    if ($type7Record->isError()) {
-                        $this->setError(true);
                     }
                     break;
                 case '8':
@@ -82,16 +75,13 @@ class NACHAOriginationRejectFile {
                         $this->companyBatchRecords[] = $currentCompanyBatchRecord;
                         $currentCompanyBatchRecord = null;
                     }
-                    if ($type8Record->isError()) {
-                        $this->setError(true);
-                    }
                     break;
                 case '9':
                     $type9Record = new Type9Record();
                     $type9Record->parseLine($line);
                     $this->fileControlHeaders[] = $type9Record;
                     if ($type9Record->isError()) {
-                        $this->setError(true);
+                        $this->setErrorReason('Unknown');
                     }
                     break;
                 default:
@@ -127,14 +117,6 @@ class NACHAOriginationRejectFile {
     }
 
     /**
-     * @param array $fileControlHeaders
-     */
-    private function setFileControlHeaders($fileControlHeaders)
-    {
-        $this->fileControlHeaders = $fileControlHeaders;
-    }
-
-    /**
      * @return array
      */
     public function getCompanyBatchRecords()
@@ -143,26 +125,28 @@ class NACHAOriginationRejectFile {
     }
 
     /**
-     * @param array $companyBatchRecords
-     */
-    private function setCompanyBatchRecords($companyBatchRecords)
-    {
-        $this->companyBatchRecords = $companyBatchRecords;
-    }
-
-    /**
      * @return boolean
      */
     public function isError()
     {
-        return $this->error;
+        return !is_null($this->getErrorReason());
     }
 
     /**
-     * @param boolean $error
+     * @return null|string
      */
-    private function setError($error)
+    public function getErrorReason()
     {
-        $this->error = $error;
+        return $this->errorReason;
     }
+
+    /**
+     * @param null|string $errorReason
+     */
+    private function setErrorReason($errorReason)
+    {
+        $this->errorReason = $errorReason;
+    }
+
+
 }
