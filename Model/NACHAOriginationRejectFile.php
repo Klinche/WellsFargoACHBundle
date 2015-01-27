@@ -27,6 +27,8 @@ class NACHAOriginationRejectFile {
     /** @var null|string */
     private $errorReason = null;
 
+    private $entryDetailRecords = array();
+
 
     public function __construct()
     {
@@ -56,6 +58,7 @@ class NACHAOriginationRejectFile {
                 case '6':
                     $type6Record = new Type6Record();
                     $type6Record->parseLine($line);
+                    $entryDetailRecords[] = $type6Record;
                     if (!is_null($currentCompanyBatchRecord)) {
                         $currentCompanyBatchRecord->addEntryDetailRecord($type6Record);
                     }
@@ -90,6 +93,22 @@ class NACHAOriginationRejectFile {
         }
     }
 
+    /**
+     * Gets the specified entry detail record for an individual id.
+     * 
+     * @param $individualID
+     * @return null|Type6Record
+     */
+    public function getType6RecordWithIndividualID($individualID) {
+        /** @var Type6Record $entryDetailRecord */
+        foreach ($this->getEntryDetailRecords() as $entryDetailRecord) {
+            if ($individualID == $entryDetailRecord->getIndividualId()) {
+                return $entryDetailRecord;
+            }
+        }
+
+        return null;
+    }
 
 
     /**
@@ -122,6 +141,14 @@ class NACHAOriginationRejectFile {
     public function getCompanyBatchRecords()
     {
         return $this->companyBatchRecords;
+    }
+
+    /**
+     * @return array
+     */
+    private function getEntryDetailRecords()
+    {
+        return $this->entryDetailRecords;
     }
 
     /**
