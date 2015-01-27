@@ -22,6 +22,9 @@ class Type7Record
     /** @var string|null */
     private $entryDetailSequenceNumber = null;
 
+    /** @var CompanyBatchRecord $companyBatchRecord */
+    private $companyBatchRecord = null;
+
     /** @var null|string  */
     private $errorCode = null;
 
@@ -224,6 +227,22 @@ class Type7Record
     private function setEntryDetailSequenceNumber($entryDetailSequenceNumber)
     {
         $this->entryDetailSequenceNumber = $entryDetailSequenceNumber;
+    }
+
+    /**
+     * @return CompanyBatchRecord
+     */
+    public function getCompanyBatchRecord()
+    {
+        return $this->companyBatchRecord;
+    }
+
+    /**
+     * @param CompanyBatchRecord $companyBatchRecord
+     */
+    public function setCompanyBatchRecord($companyBatchRecord)
+    {
+        $this->companyBatchRecord = $companyBatchRecord;
     }
 
     /**

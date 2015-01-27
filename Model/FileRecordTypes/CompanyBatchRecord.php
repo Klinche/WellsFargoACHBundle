@@ -22,6 +22,8 @@ class CompanyBatchRecord
     /** @var null|Type8Record */
     private $companyBatchControl = null;
 
+    private $error = false;
+
 
     public function __construct()
     {
@@ -41,6 +43,7 @@ class CompanyBatchRecord
     public function setCompanyBatchHeader($companyBatchHeader)
     {
         $this->companyBatchHeader = $companyBatchHeader;
+        $companyBatchHeader->setCompanyBatchRecord($this);
     }
 
     /**
@@ -65,6 +68,7 @@ class CompanyBatchRecord
     public function addEntryDetailRecord($entryDetailRecord)
     {
         $this->entryDetailRecords[] = $entryDetailRecord;
+        $entryDetailRecord->setCompanyBatchRecord($this);
     }
 
     /**
@@ -89,6 +93,7 @@ class CompanyBatchRecord
     public function addAddendaRecord($addendaRecord)
     {
         $this->addendaRecords[] = $addendaRecord;
+        $addendaRecord->setCompanyBatchRecord($this);
     }
 
     /**
@@ -105,5 +110,6 @@ class CompanyBatchRecord
     public function setCompanyBatchControl($companyBatchControl)
     {
         $this->companyBatchControl = $companyBatchControl;
+        $companyBatchControl->setCompanyBatchRecord($this);
     }
 }

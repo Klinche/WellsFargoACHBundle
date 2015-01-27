@@ -40,6 +40,9 @@ class Type6Record
     /** @var string|null */
     private $traceNumber = null;
 
+    /** @var CompanyBatchRecord $companyBatchRecord */
+    private $companyBatchRecord = null;
+
     /** @var null|string  */
     private $errorCode = null;
 
@@ -345,6 +348,22 @@ class Type6Record
     private function setTraceNumber($traceNumber)
     {
         $this->traceNumber = $traceNumber;
+    }
+
+    /**
+     * @return CompanyBatchRecord
+     */
+    public function getCompanyBatchRecord()
+    {
+        return $this->companyBatchRecord;
+    }
+
+    /**
+     * @param CompanyBatchRecord $companyBatchRecord
+     */
+    public function setCompanyBatchRecord($companyBatchRecord)
+    {
+        $this->companyBatchRecord = $companyBatchRecord;
     }
 
     /**

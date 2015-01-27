@@ -46,6 +46,9 @@ class Type5Record
     /** @var string|null */
     private $batchNumber = null;
 
+    /** @var CompanyBatchRecord $companyBatchRecord */
+    private $companyBatchRecord = null;
+
     /** @var null|string  */
     private $errorCode = null;
 
@@ -313,6 +316,22 @@ class Type5Record
     private function setBatchNumber($batchNumber)
     {
         $this->batchNumber = $batchNumber;
+    }
+
+    /**
+     * @return CompanyBatchRecord
+     */
+    public function getCompanyBatchRecord()
+    {
+        return $this->companyBatchRecord;
+    }
+
+    /**
+     * @param CompanyBatchRecord $companyBatchRecord
+     */
+    public function setCompanyBatchRecord($companyBatchRecord)
+    {
+        $this->companyBatchRecord = $companyBatchRecord;
     }
 
     /**
