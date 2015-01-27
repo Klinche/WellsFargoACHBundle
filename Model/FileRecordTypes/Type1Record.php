@@ -111,7 +111,7 @@ class Type1Record
     /**
      * @param null|string $priorityCode
      */
-    public function setPriorityCode($priorityCode)
+    private function setPriorityCode($priorityCode)
     {
         $this->priorityCode = $priorityCode;
     }
@@ -127,7 +127,7 @@ class Type1Record
     /**
      * @param null|string $wellsFargoRoutingNumber
      */
-    public function setWellsFargoRoutingNumber($wellsFargoRoutingNumber)
+    private function setWellsFargoRoutingNumber($wellsFargoRoutingNumber)
     {
         $this->wellsFargoRoutingNumber = $wellsFargoRoutingNumber;
     }
@@ -143,7 +143,7 @@ class Type1Record
     /**
      * @param null|string $fileId
      */
-    public function setFileId($fileId)
+    private function setFileId($fileId)
     {
         $this->fileId = $fileId;
     }
@@ -159,7 +159,7 @@ class Type1Record
     /**
      * @param null|string $fileCreationDate
      */
-    public function setFileCreationDate($fileCreationDate)
+    private function setFileCreationDate($fileCreationDate)
     {
         $this->fileCreationDate = $fileCreationDate;
     }
@@ -175,7 +175,7 @@ class Type1Record
     /**
      * @param null|string $fileCreationTime
      */
-    public function setFileCreationTime($fileCreationTime)
+    private function setFileCreationTime($fileCreationTime)
     {
         $this->fileCreationTime = $fileCreationTime;
     }
@@ -191,7 +191,7 @@ class Type1Record
     /**
      * @param null|string $fileIdModifier
      */
-    public function setFileIdModifier($fileIdModifier)
+    private function setFileIdModifier($fileIdModifier)
     {
         $this->fileIdModifier = $fileIdModifier;
     }
@@ -207,7 +207,7 @@ class Type1Record
     /**
      * @param null|string $recordSize
      */
-    public function setRecordSize($recordSize)
+    private function setRecordSize($recordSize)
     {
         $this->recordSize = $recordSize;
     }
@@ -223,7 +223,7 @@ class Type1Record
     /**
      * @param null|string $blockingFactor
      */
-    public function setBlockingFactor($blockingFactor)
+    private function setBlockingFactor($blockingFactor)
     {
         $this->blockingFactor = $blockingFactor;
     }
@@ -239,7 +239,7 @@ class Type1Record
     /**
      * @param null|string $formatCode
      */
-    public function setFormatCode($formatCode)
+    private function setFormatCode($formatCode)
     {
         $this->formatCode = $formatCode;
     }
@@ -255,7 +255,7 @@ class Type1Record
     /**
      * @param null|string $originationBank
      */
-    public function setOriginationBank($originationBank)
+    private function setOriginationBank($originationBank)
     {
         $this->originationBank = $originationBank;
     }
@@ -271,7 +271,7 @@ class Type1Record
     /**
      * @param null|string $companyName
      */
-    public function setCompanyName($companyName)
+    private function setCompanyName($companyName)
     {
         $this->companyName = $companyName;
     }
@@ -287,7 +287,7 @@ class Type1Record
     /**
      * @param null|string $referenceCode
      */
-    public function setReferenceCode($referenceCode)
+    private function setReferenceCode($referenceCode)
     {
         $this->referenceCode = $referenceCode;
     }
@@ -303,7 +303,7 @@ class Type1Record
     /**
      * @param null|string $errorCode
      */
-    public function setErrorCode($errorCode)
+    private function setErrorCode($errorCode)
     {
         $this->errorCode = $errorCode;
     }
@@ -321,5 +321,13 @@ class Type1Record
         }
 
         return $this->errorCodes[$this->getErrorCode()];
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isError()
+    {
+        return !is_null($this->getErrorCode());
     }
 }

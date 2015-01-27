@@ -198,7 +198,7 @@ class Type6Record
     /**
      * @param null|string $transactionCode
      */
-    public function setTransactionCode($transactionCode)
+    private function setTransactionCode($transactionCode)
     {
         $this->transactionCode = $transactionCode;
     }
@@ -214,7 +214,7 @@ class Type6Record
     /**
      * @param null|string $receivingDFIRoutingNumber
      */
-    public function setReceivingDFIRoutingNumber($receivingDFIRoutingNumber)
+    private function setReceivingDFIRoutingNumber($receivingDFIRoutingNumber)
     {
         $this->receivingDFIRoutingNumber = $receivingDFIRoutingNumber;
     }
@@ -230,7 +230,7 @@ class Type6Record
     /**
      * @param null|string $routingNumberCheckDigit
      */
-    public function setRoutingNumberCheckDigit($routingNumberCheckDigit)
+    private function setRoutingNumberCheckDigit($routingNumberCheckDigit)
     {
         $this->routingNumberCheckDigit = $routingNumberCheckDigit;
     }
@@ -246,7 +246,7 @@ class Type6Record
     /**
      * @param null|string $receivingDFIAccountNumber
      */
-    public function setReceivingDFIAccountNumber($receivingDFIAccountNumber)
+    private function setReceivingDFIAccountNumber($receivingDFIAccountNumber)
     {
         $this->receivingDFIAccountNumber = $receivingDFIAccountNumber;
     }
@@ -262,7 +262,7 @@ class Type6Record
     /**
      * @param null|string $amount
      */
-    public function setAmount($amount)
+    private function setAmount($amount)
     {
         $this->amount = $amount;
     }
@@ -278,7 +278,7 @@ class Type6Record
     /**
      * @param null|string $individualId
      */
-    public function setIndividualId($individualId)
+    private function setIndividualId($individualId)
     {
         $this->individualId = $individualId;
     }
@@ -294,7 +294,7 @@ class Type6Record
     /**
      * @param null|string $individualName
      */
-    public function setIndividualName($individualName)
+    private function setIndividualName($individualName)
     {
         $this->individualName = $individualName;
     }
@@ -310,7 +310,7 @@ class Type6Record
     /**
      * @param null|string $discretionaryData
      */
-    public function setDiscretionaryData($discretionaryData)
+    private function setDiscretionaryData($discretionaryData)
     {
         $this->discretionaryData = $discretionaryData;
     }
@@ -326,7 +326,7 @@ class Type6Record
     /**
      * @param null|string $addendaRecordIndicator
      */
-    public function setAddendaRecordIndicator($addendaRecordIndicator)
+    private function setAddendaRecordIndicator($addendaRecordIndicator)
     {
         $this->addendaRecordIndicator = $addendaRecordIndicator;
     }
@@ -342,7 +342,7 @@ class Type6Record
     /**
      * @param null|string $traceNumber
      */
-    public function setTraceNumber($traceNumber)
+    private function setTraceNumber($traceNumber)
     {
         $this->traceNumber = $traceNumber;
     }
@@ -358,7 +358,7 @@ class Type6Record
     /**
      * @param null|string $errorCode
      */
-    public function setErrorCode($errorCode)
+    private function setErrorCode($errorCode)
     {
         $this->errorCode = $errorCode;
     }
@@ -376,5 +376,13 @@ class Type6Record
         }
 
         return $this->errorCodes[$this->getErrorCode()];
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isError()
+    {
+        return !is_null($this->getErrorCode());
     }
 }

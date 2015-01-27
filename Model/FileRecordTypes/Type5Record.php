@@ -134,7 +134,7 @@ class Type5Record
     /**
      * @param null|string $serviceClassCode
      */
-    public function setServiceClassCode($serviceClassCode)
+    private function setServiceClassCode($serviceClassCode)
     {
         $this->serviceClassCode = $serviceClassCode;
     }
@@ -150,7 +150,7 @@ class Type5Record
     /**
      * @param null|string $companyName
      */
-    public function setCompanyName($companyName)
+    private function setCompanyName($companyName)
     {
         $this->companyName = $companyName;
     }
@@ -166,7 +166,7 @@ class Type5Record
     /**
      * @param null|string $companyDiscretionaryData
      */
-    public function setCompanyDiscretionaryData($companyDiscretionaryData)
+    private function setCompanyDiscretionaryData($companyDiscretionaryData)
     {
         $this->companyDiscretionaryData = $companyDiscretionaryData;
     }
@@ -182,7 +182,7 @@ class Type5Record
     /**
      * @param null|string $companyId
      */
-    public function setCompanyId($companyId)
+    private function setCompanyId($companyId)
     {
         $this->companyId = $companyId;
     }
@@ -198,7 +198,7 @@ class Type5Record
     /**
      * @param null|string $standardEntryClass
      */
-    public function setStandardEntryClass($standardEntryClass)
+    private function setStandardEntryClass($standardEntryClass)
     {
         $this->standardEntryClass = $standardEntryClass;
     }
@@ -214,7 +214,7 @@ class Type5Record
     /**
      * @param null|string $companyEntryDescription
      */
-    public function setCompanyEntryDescription($companyEntryDescription)
+    private function setCompanyEntryDescription($companyEntryDescription)
     {
         $this->companyEntryDescription = $companyEntryDescription;
     }
@@ -230,7 +230,7 @@ class Type5Record
     /**
      * @param null|string $companyDescriptiveDate
      */
-    public function setCompanyDescriptiveDate($companyDescriptiveDate)
+    private function setCompanyDescriptiveDate($companyDescriptiveDate)
     {
         $this->companyDescriptiveDate = $companyDescriptiveDate;
     }
@@ -246,7 +246,7 @@ class Type5Record
     /**
      * @param null|string $effectiveEntryDate
      */
-    public function setEffectiveEntryDate($effectiveEntryDate)
+    private function setEffectiveEntryDate($effectiveEntryDate)
     {
         $this->effectiveEntryDate = $effectiveEntryDate;
     }
@@ -262,7 +262,7 @@ class Type5Record
     /**
      * @param null|string $settlementDate
      */
-    public function setSettlementDate($settlementDate)
+    private function setSettlementDate($settlementDate)
     {
         $this->settlementDate = $settlementDate;
     }
@@ -278,7 +278,7 @@ class Type5Record
     /**
      * @param null|string $originatorStatusCode
      */
-    public function setOriginatorStatusCode($originatorStatusCode)
+    private function setOriginatorStatusCode($originatorStatusCode)
     {
         $this->originatorStatusCode = $originatorStatusCode;
     }
@@ -294,7 +294,7 @@ class Type5Record
     /**
      * @param null|string $wellsFargoRoutingNumber
      */
-    public function setWellsFargoRoutingNumber($wellsFargoRoutingNumber)
+    private function setWellsFargoRoutingNumber($wellsFargoRoutingNumber)
     {
         $this->wellsFargoRoutingNumber = $wellsFargoRoutingNumber;
     }
@@ -310,7 +310,7 @@ class Type5Record
     /**
      * @param null|string $batchNumber
      */
-    public function setBatchNumber($batchNumber)
+    private function setBatchNumber($batchNumber)
     {
         $this->batchNumber = $batchNumber;
     }
@@ -326,7 +326,7 @@ class Type5Record
     /**
      * @param null|string $errorCode
      */
-    public function setErrorCode($errorCode)
+    private function setErrorCode($errorCode)
     {
         $this->errorCode = $errorCode;
     }
@@ -345,4 +345,13 @@ class Type5Record
 
         return $this->errorCodes[$this->getErrorCode()];
     }
+
+    /**
+     * @return boolean
+     */
+    public function isError()
+    {
+        return !is_null($this->getErrorCode());
+    }
+
 }

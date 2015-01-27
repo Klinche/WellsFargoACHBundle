@@ -97,7 +97,7 @@ class Type8Record
     /**
      * @param null|string $serviceClassCode
      */
-    public function setServiceClassCode($serviceClassCode)
+    private function setServiceClassCode($serviceClassCode)
     {
         $this->serviceClassCode = $serviceClassCode;
     }
@@ -113,7 +113,7 @@ class Type8Record
     /**
      * @param null|string $entryAddendaCount
      */
-    public function setEntryAddendaCount($entryAddendaCount)
+    private function setEntryAddendaCount($entryAddendaCount)
     {
         $this->entryAddendaCount = $entryAddendaCount;
     }
@@ -129,7 +129,7 @@ class Type8Record
     /**
      * @param null|string $entryHash
      */
-    public function setEntryHash($entryHash)
+    private function setEntryHash($entryHash)
     {
         $this->entryHash = $entryHash;
     }
@@ -145,7 +145,7 @@ class Type8Record
     /**
      * @param null|string $totalBatchDebitEntryDollarAmount
      */
-    public function setTotalBatchDebitEntryDollarAmount($totalBatchDebitEntryDollarAmount)
+    private function setTotalBatchDebitEntryDollarAmount($totalBatchDebitEntryDollarAmount)
     {
         $this->totalBatchDebitEntryDollarAmount = $totalBatchDebitEntryDollarAmount;
     }
@@ -161,7 +161,7 @@ class Type8Record
     /**
      * @param null|string $totalBatchCreditEntryDollarAmount
      */
-    public function setTotalBatchCreditEntryDollarAmount($totalBatchCreditEntryDollarAmount)
+    private function setTotalBatchCreditEntryDollarAmount($totalBatchCreditEntryDollarAmount)
     {
         $this->totalBatchCreditEntryDollarAmount = $totalBatchCreditEntryDollarAmount;
     }
@@ -177,7 +177,7 @@ class Type8Record
     /**
      * @param null|string $companyId
      */
-    public function setCompanyId($companyId)
+    private function setCompanyId($companyId)
     {
         $this->companyId = $companyId;
     }
@@ -193,7 +193,7 @@ class Type8Record
     /**
      * @param null|string $messageAuthenticationCode
      */
-    public function setMessageAuthenticationCode($messageAuthenticationCode)
+    private function setMessageAuthenticationCode($messageAuthenticationCode)
     {
         $this->messageAuthenticationCode = $messageAuthenticationCode;
     }
@@ -209,7 +209,7 @@ class Type8Record
     /**
      * @param null|string $blank
      */
-    public function setBlank($blank)
+    private function setBlank($blank)
     {
         $this->blank = $blank;
     }
@@ -225,7 +225,7 @@ class Type8Record
     /**
      * @param null|string $wellsFargoRoutingNumber
      */
-    public function setWellsFargoRoutingNumber($wellsFargoRoutingNumber)
+    private function setWellsFargoRoutingNumber($wellsFargoRoutingNumber)
     {
         $this->wellsFargoRoutingNumber = $wellsFargoRoutingNumber;
     }
@@ -241,7 +241,7 @@ class Type8Record
     /**
      * @param null|string $batchNumber
      */
-    public function setBatchNumber($batchNumber)
+    private function setBatchNumber($batchNumber)
     {
         $this->batchNumber = $batchNumber;
     }
@@ -257,7 +257,7 @@ class Type8Record
     /**
      * @param null|string $errorCode
      */
-    public function setErrorCode($errorCode)
+    private function setErrorCode($errorCode)
     {
         $this->errorCode = $errorCode;
     }
@@ -275,5 +275,13 @@ class Type8Record
         }
 
         return $this->errorCodes[$this->getErrorCode()];
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isError()
+    {
+        return !is_null($this->getErrorCode());
     }
 }

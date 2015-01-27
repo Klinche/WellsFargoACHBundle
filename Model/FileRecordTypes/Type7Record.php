@@ -173,7 +173,7 @@ class Type7Record
     /**
      * @param null|string $addendaTypeCode
      */
-    public function setAddendaTypeCode($addendaTypeCode)
+    private function setAddendaTypeCode($addendaTypeCode)
     {
         $this->addendaTypeCode = $addendaTypeCode;
     }
@@ -189,7 +189,7 @@ class Type7Record
     /**
      * @param null|string $paymentRelatedInformation
      */
-    public function setPaymentRelatedInformation($paymentRelatedInformation)
+    private function setPaymentRelatedInformation($paymentRelatedInformation)
     {
         $this->paymentRelatedInformation = $paymentRelatedInformation;
     }
@@ -205,7 +205,7 @@ class Type7Record
     /**
      * @param null|string $addendaSequenceNumber
      */
-    public function setAddendaSequenceNumber($addendaSequenceNumber)
+    private function setAddendaSequenceNumber($addendaSequenceNumber)
     {
         $this->addendaSequenceNumber = $addendaSequenceNumber;
     }
@@ -221,7 +221,7 @@ class Type7Record
     /**
      * @param null|string $entryDetailSequenceNumber
      */
-    public function setEntryDetailSequenceNumber($entryDetailSequenceNumber)
+    private function setEntryDetailSequenceNumber($entryDetailSequenceNumber)
     {
         $this->entryDetailSequenceNumber = $entryDetailSequenceNumber;
     }
@@ -237,7 +237,7 @@ class Type7Record
     /**
      * @param null|string $errorCode
      */
-    public function setErrorCode($errorCode)
+    private function setErrorCode($errorCode)
     {
         $this->errorCode = $errorCode;
     }
@@ -255,5 +255,13 @@ class Type7Record
         }
 
         return $this->errorCodes[$this->getErrorCode()];
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isError()
+    {
+        return !is_null($this->getErrorCode());
     }
 }

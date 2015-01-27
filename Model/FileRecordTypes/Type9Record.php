@@ -174,4 +174,14 @@ class Type9Record
     {
         $this->filler = $filler;
     }
+
+
+    /**
+     * @return boolean
+     * //TODO: Always returns false since the documentation does not mention how to get the error.
+     */
+    public function isError()
+    {
+        return false;
+    }
 }
