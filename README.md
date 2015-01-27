@@ -2,7 +2,7 @@
 
 **This bundle is used to help communicate with the Wells Fargo ACH Service**
 
-[![Build Status](https://travis-ci.org/DABSquared/wells-fargo-ach-bundle.svg?branch=master)](https://travis-ci.org/dabsquared/wells-fargo-ach-bundle)
+[![Build Status](https://travis-ci.org/DABSquared/WellsFargoACHBundle.svg?branch=master)](https://travis-ci.org/DABSquared/WellsFargoACHBundle)
 [![Latest Stable Version](https://poser.pugx.org/dabsquared/wells-fargo-ach-bundle/v/stable.svg)](https://packagist.org/packages/dabsquared/wells-fargo-ach-bundle)
 [![Latest Unstable Version](https://poser.pugx.org/dabsquared/wells-fargo-ach-bundle/v/unstable.svg)](https://packagist.org/packages/dabsquared/wells-fargo-ach-bundle)
 [![Total Downloads](https://poser.pugx.org/dabsquared/wells-fargo-ach-bundle/downloads.svg)](https://packagist.org/packages/dabsquared/wells-fargo-ach-bundle)
