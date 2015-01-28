@@ -95,7 +95,7 @@ class NACHAOriginationRejectFile {
 
     /**
      * Gets the specified entry detail record for an individual id.
-     * 
+     *
      * @param $individualID
      * @return null|Type6Record
      */
