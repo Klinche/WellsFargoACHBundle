@@ -20,7 +20,10 @@
             <argument>%wellsfargo.transmission_public_key_path%</argument>
             <argument>%wellsfargo.inbound_folder%</argument>
             <argument>%wellsfargo.outbound_folder%</argument>
-            <argument>%wellsfargo.archive_out_folder%</argument>
+            <argument>%wellsfargo.returns_report_folder%</argument>
+            <argument>%wellsfargo.archive.inbound_folder%</argument>
+            <argument>%wellsfargo.archive.outbound_folder%</argument>
+            <argument>%wellsfargo.archive.returns_report_folder%</argument>
             <argument type="service" id="logger" />
         </service>
 

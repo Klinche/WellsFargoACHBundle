@@ -53,7 +53,12 @@ class WellsFargoACHExtension extends Extension {
 
         $container->setParameter('wellsfargo.inbound_folder', $config['folders']['inbound']);
         $container->setParameter('wellsfargo.outbound_folder', $config['folders']['outbound']);
-        $container->setParameter('wellsfargo.archive_out_folder', $config['folders']['archive_out']);
         $container->setParameter('wellsfargo.returns_report_folder', $config['folders']['returns_report']);
+
+        $container->setParameter('wellsfargo.archive.inbound_folder', $config['archive']['inbound']);
+        $container->setParameter('wellsfargo.archive.outbound_folder', $config['archive']['outbound']);
+        $container->setParameter('wellsfargo.archive.returns_report_folder', $config['archive']['returns_report']);
+
+
     }
 }

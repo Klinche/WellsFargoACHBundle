@@ -54,14 +54,23 @@ class NACHAManager {
     /** @var string $wellsFargoTransmissionOutboundFolder */
     private $wellsFargoTransmissionOutboundFolder;
 
-    /** @var string $wellsFargoTransmissionArchiveOutFolder */
-    private $wellsFargoTransmissionArchiveOutFolder;
+    /** @var string $wellsFargoTransmissionReturnsReportFolder */
+    private $wellsFargoTransmissionReturnsReportFolder;
+
+    /** @var string $wellsFargoTransmissionArchiveInboundFolder */
+    private $wellsFargoTransmissionArchiveInboundFolder;
+
+    /** @var string $wellsFargoTransmissionArchiveOutboundFolder */
+    private $wellsFargoTransmissionArchiveOutboundFolder;
+
+    /** @var string $wellsFargoTransmissionArchiveReturnsReportFolder */
+    private $wellsFargoTransmissionArchiveReturnsReportFolder;
 
 
     /** @var $logger \Monolog\Logger */
     private $logger;
 
-    public function __construct($routingNumber, $companyId, $applicationId, $fileId, $originatingBank, $companyName, $wellsFargoTransmissionHost, $wellsFargoTransmissionUsername, $wellsFargoTransmissionPrivateKey, $wellsFargoTransmissionPrivateKeyPassword, $wellsFargoTransmissionPublicKey, $wellsFargoTransmissionInboundFolder, $wellsFargoTransmissionOutboundFolder, $wellsFargoTransmissionArchiveOutFolder, $logger)
+    public function __construct($routingNumber, $companyId, $applicationId, $fileId, $originatingBank, $companyName, $wellsFargoTransmissionHost, $wellsFargoTransmissionUsername, $wellsFargoTransmissionPrivateKey, $wellsFargoTransmissionPrivateKeyPassword, $wellsFargoTransmissionPublicKey, $wellsFargoTransmissionInboundFolder, $wellsFargoTransmissionOutboundFolder, $wellsFargoTransmissionReturnsReportFolder, $wellsFargoTransmissionArchiveInboundFolder, $wellsFargoTransmissionArchiveOutboundFolder, $wellsFargoTransmissionArchiveReturnsReportFolder,  $logger)
     {
         $this->bankrt = $routingNumber;
         $this->companyId = $companyId;
@@ -76,10 +85,14 @@ class NACHAManager {
         $this->wellsFargoTransmissionPrivateKey = $wellsFargoTransmissionPrivateKey;
         $this->wellsFargoTransmissionPrivateKeyPassword = $wellsFargoTransmissionPrivateKeyPassword;
         $this->wellsFargoTransmissionPublicKey = $wellsFargoTransmissionPublicKey;
+
         $this->wellsFargoTransmissionInboundFolder = $wellsFargoTransmissionInboundFolder;
         $this->wellsFargoTransmissionOutboundFolder = $wellsFargoTransmissionOutboundFolder;
-        $this->wellsFargoTransmissionArchiveOutFolder = $wellsFargoTransmissionArchiveOutFolder;
+        $this->wellsFargoTransmissionReturnsReportFolder = $wellsFargoTransmissionReturnsReportFolder;
 
+        $this->wellsFargoTransmissionArchiveInboundFolder = $wellsFargoTransmissionArchiveInboundFolder;
+        $this->wellsFargoTransmissionArchiveOutboundFolder = $wellsFargoTransmissionArchiveOutboundFolder;
+        $this->wellsFargoTransmissionArchiveReturnsReportFolder = $wellsFargoTransmissionArchiveReturnsReportFolder;
     }
 
     /**
@@ -168,9 +181,13 @@ class NACHAManager {
     #region "Reports"
 
     /**
-     * Processes the Wells Fargo report for a specific time.
+     *  Processes the Wells Fargo report for a specific time.
+     *
+     * @param \DateTime $dateTime
+     * @param bool $searchArchives Whether or not to search archived files
+     * @return array
      */
-    public function processWellsFargoReportForDateTime(\DateTime $dateTime)
+    public function processWellsFargoReportForDateTime(\DateTime $dateTime, $searchArchives = false)
     {
         $this->logger->info('Starting Processing of Wells Fargo NACHA Report');
 
@@ -184,8 +201,35 @@ class NACHAManager {
 
         $sftp = ssh2_sftp($connection);
 
-        $outboundConnectionURL = 'ssh2.sftp://'.$sftp.'/'.$this->wellsFargoTransmissionOutboundFolder;
-        $outboundFolderHandle = opendir($outboundConnectionURL);
+        $returnsReportConnectionURL = 'ssh2.sftp://'.$sftp.'/'.$this->wellsFargoTransmissionReturnsReportFolder;
+        $originationFilesToProcess = $this->processWellsFargoReturnsReportForURL($returnsReportConnectionURL, $dateTime);
+
+        if($searchArchives) {
+            $returnsReportArchiveConnectionURL = 'ssh2.sftp://'.$sftp.'/'.$this->wellsFargoTransmissionArchiveReturnsReportFolder;
+            $originationArchiveFilesToProcess = $this->processWellsFargoReturnsReportForURL($returnsReportArchiveConnectionURL, $dateTime);
+
+            if(count($originationFilesToProcess) == 0) {
+                $originationFilesToProcess = $originationArchiveFilesToProcess;
+            } else if(count($originationArchiveFilesToProcess) != 0) {
+                array_merge($originationFilesToProcess, $originationArchiveFilesToProcess);
+            }
+        }
+
+        $this->logger->info('Finished Processing of Wells Fargo NACHA Report');
+
+        return $originationFilesToProcess;
+    }
+
+
+    /**
+     * @param $returnsReportConnectionURL
+     * @param \DateTime $dateTime
+     * @return array
+     */
+    private function processWellsFargoReturnsReportForURL($returnsReportConnectionURL, \DateTime $dateTime)
+    {
+
+        $outboundFolderHandle = opendir($returnsReportConnectionURL);
 
         $script_tz = date_default_timezone_get();
         date_default_timezone_set('PST8PDT');
@@ -198,20 +242,20 @@ class NACHAManager {
         while (false !== ($file = readdir($outboundFolderHandle))) {
             $originationRejectFile = new NACHAOriginationRejectFile();
 
-            $sftpStream = @fopen($outboundConnectionURL.'/'.$file, 'r');
+            $sftpStream = @fopen($returnsReportConnectionURL.'/'.$file, 'r');
 
             try {
                 if (!$sftpStream) {
-                    $this->logger->critical('Could not open remote sftp file for NACHA report reading: '.$outboundConnectionURL.'/'.$file);
+                    $this->logger->critical('Could not open remote sftp file for NACHA report reading: '.$returnsReportConnectionURL.'/'.$file);
                     continue;
                 }
 
-                $contents = fread($sftpStream, filesize($outboundConnectionURL.'/'.$file));
+                $contents = fread($sftpStream, filesize($returnsReportConnectionURL.'/'.$file));
                 fclose($sftpStream);
 
                 $originationRejectFile->parseString($contents);
             } catch (Exception $e) {
-                $this->logger->critical('Could not read the NACHA report file to wells fargo: '. $e->getMessage().'  :  '.$outboundConnectionURL.'/'.$file);
+                $this->logger->critical('Could not read the NACHA report file from wells fargo: '. $e->getMessage().'  :  '.$returnsReportConnectionURL.'/'.$file);
                 fclose($sftpStream);
                 continue;
             }
@@ -226,9 +270,8 @@ class NACHAManager {
 
         date_default_timezone_set($script_tz);
 
-        $this->logger->info('Finished Processing of Wells Fargo NACHA Report');
-
         return $originationFilesToProcess;
     }
+
 
 }
