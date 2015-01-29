@@ -181,13 +181,22 @@ class NACHAManager {
     #region "Reports"
 
     /**
-     *  Processes the Wells Fargo report for a specific time.
-     *
      * @param \DateTime $dateTime
+     * @param bool $searchArchives
+     */
+    public function processWellsFargoReportForDateTime(\DateTime $dateTime, $searchArchives = false)
+    {
+        $this->processWellsFargoReportForDateTimes(array($dateTime), $searchArchives);
+    }
+
+    /**
+     *  Processes the Wells Fargo report for specific times.
+     *
+     * @param array $dateTimes
      * @param bool $searchArchives Whether or not to search archived files
      * @return array
      */
-    public function processWellsFargoReportForDateTime(\DateTime $dateTime, $searchArchives = false)
+    public function processWellsFargoReportForDateTimes(array $dateTimes, $searchArchives = false)
     {
         $this->logger->info('Starting Processing of Wells Fargo NACHA Report');
 
@@ -202,11 +211,11 @@ class NACHAManager {
         $sftp = ssh2_sftp($connection);
 
         $returnsReportConnectionURL = 'ssh2.sftp://'.$sftp.'/'.$this->wellsFargoTransmissionReturnsReportFolder;
-        $originationFilesToProcess = $this->processWellsFargoReturnsReportForURL($returnsReportConnectionURL, $dateTime);
+        $originationFilesToProcess = $this->processWellsFargoReturnsReportForURLAndDates($returnsReportConnectionURL, $dateTimes);
 
         if($searchArchives) {
             $returnsReportArchiveConnectionURL = 'ssh2.sftp://'.$sftp.'/'.$this->wellsFargoTransmissionArchiveReturnsReportFolder;
-            $originationArchiveFilesToProcess = $this->processWellsFargoReturnsReportForURL($returnsReportArchiveConnectionURL, $dateTime);
+            $originationArchiveFilesToProcess = $this->processWellsFargoReturnsReportForURLAndDates($returnsReportArchiveConnectionURL, $dateTimes);
 
             if(count($originationFilesToProcess) == 0) {
                 $originationFilesToProcess = $originationArchiveFilesToProcess;
@@ -223,10 +232,10 @@ class NACHAManager {
 
     /**
      * @param $returnsReportConnectionURL
-     * @param \DateTime $dateTime
+     * @param array $dateTimes
      * @return array
      */
-    private function processWellsFargoReturnsReportForURL($returnsReportConnectionURL, \DateTime $dateTime)
+    private function processWellsFargoReturnsReportForURLAndDates($returnsReportConnectionURL, array $dateTimes)
     {
 
         $outboundFolderHandle = opendir($returnsReportConnectionURL);
@@ -234,8 +243,11 @@ class NACHAManager {
         $script_tz = date_default_timezone_get();
         date_default_timezone_set('PST8PDT');
 
-        $dateTime->setTimezone(new \DateTimeZone('PST8PDT'));
-        $dateTime->setTime(0, 0, 0);
+        /** @var \DateTime $dateTime */
+        foreach($dateTimes as &$dateTime) {
+            $dateTime->setTimezone(new \DateTimeZone('PST8PDT'));
+            $dateTime->setTime(0, 0, 0);
+        }
 
         $originationFilesToProcess = array();
 
@@ -263,7 +275,7 @@ class NACHAManager {
             $creationDate = new \DateTime($originationRejectFile->getFileHeader()->getFileCreationDate(), new \DateTimeZone('PST8PDT'));
             $creationDate->setTime(0, 0, 0);
 
-            if($creationDate == $dateTime) {
+            if(in_array($creationDate, $dateTimes)) {
                 $originationFilesToProcess[] = $originationRejectFile;
             }
         }
