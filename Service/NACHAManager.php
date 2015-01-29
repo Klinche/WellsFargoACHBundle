@@ -123,7 +123,7 @@ class NACHAManager {
         $fileModifier = 'A';
 
         while (false !== ($file = readdir($inboundFolderHandle))) {
-            $fileCreationTime = new \DateTime(date("F d Y H:i:s.", filemtime($inboundConnectionURL.'/'.$file)), new \DateTimeZone('Etc/GMT-7'));
+            $fileCreationTime = new \DateTime(date("F d Y H:i:s.", filemtime($inboundConnectionURL.'/'.$file)), new \DateTimeZone('PST8PDT'));
             $fileCreationTime->setTime(0, 0, 0);
             if ($fileCreationTime == $now) {
                 $fileModifier++;
@@ -168,7 +168,7 @@ class NACHAManager {
     #region "Reports"
 
     /**
-     * t
+     * Processes the Wells Fargo report for a specific time.
      */
     public function processWellsFargoReportForDateTime(\DateTime $dateTime)
     {
@@ -196,29 +196,30 @@ class NACHAManager {
         $originationFilesToProcess = array();
 
         while (false !== ($file = readdir($outboundFolderHandle))) {
-            $fileCreationTime = new \DateTime(date("F d Y H:i:s.", filemtime($outboundConnectionURL.'/'.$file)), new \DateTimeZone('PST8PDT'));
-            $fileCreationTime->setTime(0, 0, 0);
-            if ($fileCreationTime == $dateTime) {
-                $originationRejectFile = new NACHAOriginationRejectFile();
+            $originationRejectFile = new NACHAOriginationRejectFile();
 
-                $sftpStream = @fopen($outboundConnectionURL.'/'.$file, 'r');
+            $sftpStream = @fopen($outboundConnectionURL.'/'.$file, 'r');
 
-                try {
-                    if (!$sftpStream) {
-                        $this->logger->critical('Could not open remote sftp file for NACHA report reading: '.$outboundConnectionURL.'/'.$file);
-                        continue;
-                    }
-
-                    $contents = fread($sftpStream, filesize($outboundConnectionURL.'/'.$file));
-                    fclose($sftpStream);
-
-                    $originationRejectFile->parseString($contents);
-                } catch (Exception $e) {
-                    $this->logger->critical('Could not read the NACHA report file to wells fargo: '. $e->getMessage().'  :  '.$outboundConnectionURL.'/'.$file);
-                    fclose($sftpStream);
+            try {
+                if (!$sftpStream) {
+                    $this->logger->critical('Could not open remote sftp file for NACHA report reading: '.$outboundConnectionURL.'/'.$file);
                     continue;
                 }
 
+                $contents = fread($sftpStream, filesize($outboundConnectionURL.'/'.$file));
+                fclose($sftpStream);
+
+                $originationRejectFile->parseString($contents);
+            } catch (Exception $e) {
+                $this->logger->critical('Could not read the NACHA report file to wells fargo: '. $e->getMessage().'  :  '.$outboundConnectionURL.'/'.$file);
+                fclose($sftpStream);
+                continue;
+            }
+
+            $creationDate = new \DateTime($originationRejectFile->getFileHeader()->getFileCreationDate(), new \DateTimeZone('PST8PDT'));
+            $creationDate->setTime(0, 0, 0);
+
+            if($creationDate == $dateTime) {
                 $originationFilesToProcess[] = $originationRejectFile;
             }
         }
