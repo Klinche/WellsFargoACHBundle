@@ -386,11 +386,16 @@ class Type6Record
      * @return null|string
      */
     public function getErrorDescription() {
-        if(is_null($this->getErrorCode())) {
+
+        if( $this->getCompanyBatchRecord()->isBatchError()) {
+            return $this->getCompanyBatchRecord()->getBatchErrorDescription();
+        }
+
+        if (is_null($this->getErrorCode())) {
             return null;
         }
 
-        if(!array_key_exists($this->getErrorCode(), $this->errorCodes)) {
+        if (!array_key_exists($this->getErrorCode(), $this->errorCodes)) {
             return 'Unknown Error';
         }
 
@@ -402,6 +407,6 @@ class Type6Record
      */
     public function isError()
     {
-        return !is_null($this->getErrorCode());
+        return !is_null($this->getErrorCode()) || $this->getCompanyBatchRecord()->isBatchError();
     }
 }

@@ -119,4 +119,19 @@ class CompanyBatchRecord
     public function isBatchError() {
         return $this->getCompanyBatchControl()->isError() || $this->getCompanyBatchHeader()->isError();
     }
+
+    /**
+     * Returns the error for the company batch record.
+     *
+     * @return bool
+     */
+    public function getBatchErrorDescription() {
+        if ($this->getCompanyBatchControl()->isError()) {
+            return $this->getCompanyBatchControl()->getErrorDescription();
+        } else if($this->getCompanyBatchHeader()->isError()) {
+            return $this->getCompanyBatchHeader()->getErrorDescription();
+        }
+
+        return null;
+    }
 }
