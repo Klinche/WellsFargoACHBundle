@@ -212,7 +212,6 @@ class NACHAManager {
 
         $returnsReportConnectionURL = 'ssh2.sftp://'.$sftp.'/'.$this->wellsFargoTransmissionReturnsReportFolder;
         $originationFilesToProcess = $this->processWellsFargoReturnsReportForURLAndDates($returnsReportConnectionURL, $dateTimes);
-
         if($searchArchives) {
             $returnsReportArchiveConnectionURL = 'ssh2.sftp://'.$sftp.'/'.$this->wellsFargoTransmissionArchiveReturnsReportFolder;
             $originationArchiveFilesToProcess = $this->processWellsFargoReturnsReportForURLAndDates($returnsReportArchiveConnectionURL, $dateTimes);
@@ -248,7 +247,6 @@ class NACHAManager {
             $dateTime->setTimezone(new \DateTimeZone('PST8PDT'));
             $dateTime->setTime(0, 0, 0);
         }
-
         $originationFilesToProcess = array();
 
         while (false !== ($file = readdir($outboundFolderHandle))) {
@@ -263,6 +261,7 @@ class NACHAManager {
                 }
 
                 $contents = fread($sftpStream, filesize($returnsReportConnectionURL.'/'.$file));
+
                 fclose($sftpStream);
 
                 $originationRejectFile->parseString($contents);
@@ -279,6 +278,8 @@ class NACHAManager {
                 $originationFilesToProcess[] = $originationRejectFile;
             }
         }
+
+        closedir($outboundFolderHandle);
 
         date_default_timezone_set($script_tz);
 

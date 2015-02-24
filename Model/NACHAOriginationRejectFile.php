@@ -53,7 +53,9 @@ class NACHAOriginationRejectFile {
                 case '5':
                     $type5Record = new Type5Record();
                     $type5Record->parseLine($line);
-                    $currentCompanyBatchRecord = $type5Record;
+                    $currentCompanyBatchRecord = new CompanyBatchRecord();
+                    $currentCompanyBatchRecord->setCompanyBatchHeader($type5Record);
+                    $type5Record->setCompanyBatchRecord($currentCompanyBatchRecord);
                     break;
                 case '6':
                     $type6Record = new Type6Record();
