@@ -21,6 +21,7 @@ class NACHABatch {
     public $detailRecordCount = 0;
     public $creditTotal = 0;
     public $debitTotal = 0;
+    public $routingHash = 0;
 
     public $NACHAFile = null;
 
@@ -36,7 +37,7 @@ class NACHABatch {
 
     public function createBatchHeader()
     {
-        $this->batchHeader = '5'.$this->scc.$this->NACHAFile->formatText($this->NACHAFile->getCompanyName(), 16).$this->NACHAFile->formatText($this->NACHAFile->getCompanyDiscretionaryData(), 20).$this->NACHAFile->getCompanyId().$this->secType.$this->NACHAFile->formatText($this->NACHAFile->getCompanyEntryDescription(), 10).$this->NACHAFile->formatText($this->getCompanyDescriptionDate(), 6).$this->NACHAFile->getEffectiveEntryDate().'   1'.substr($this->NACHAFile->getBankrt(), 0, 8).$this->NACHAFile->formatNumeric($this->NACHAFile->getBatchNumber(), 7);
+        $this->batchHeader = '5'.$this->NACHAFile->getScc().$this->NACHAFile->formatText($this->NACHAFile->getCompanyName(), 16).$this->NACHAFile->formatText($this->NACHAFile->getCompanyDiscretionaryData(), 20).$this->NACHAFile->getCompanyId().$this->secType.$this->NACHAFile->formatText($this->NACHAFile->getCompanyEntryDescription(), 10).$this->NACHAFile->formatText($this->NACHAFile->getCompanyDescriptionDate(), 6).$this->NACHAFile->getEffectiveEntryDate().'   1'.substr($this->NACHAFile->getBankrt(), 0, 8).$this->NACHAFile->formatNumeric($this->batchNumber, 7);
         if (strlen($this->batchHeader) == 94) {
             $this->validBatchHeader = true;
         }
@@ -52,7 +53,7 @@ class NACHABatch {
             $this->batchLines .= $line."\n";
             $this->detailRecordCount++;
             $this->routingHash += (int) substr($info->getRoutingNumber(), 0, 8);
-            if ($info->getTransCode() == self::CHECKING_DEBIT || $info->getTransCode() == self::SAVINGS_DEBIT) {
+            if ($info->getTransCode() == NACHAFile::CHECKING_DEBIT || $info->getTransCode() == NACHAFile::SAVINGS_DEBIT) {
                 $this->debitTotal += (float) $info->getTotalAmount();
             } else {
                 $this->creditTotal += (float) $info->getTotalAmount();
@@ -66,7 +67,7 @@ class NACHABatch {
 
     public function createBatchFooter()
     {
-        $this->batchFooter = '8'.$this->NACHAFile->getScc().$this->NACHAFile->formatNumeric($this->detailRecordCount, 6).$this->NACHAFile->formatNumeric($this->NACHAFile->getRoutingHash(), 10).$this->NACHAFile->formatNumeric(number_format($this->debitTotal, 2), 12).$this->NACHAFile->formatNumeric(number_format($this->creditTotal, 2), 12).$this->NACHAFile->formatText($this->NACHAFile->getCompanyId(), 10).$this->NACHAFile->formatText('', 25).substr($this->NACHAFile->getBankrt(), 0, 8).$this->NACHAFile->formatNumeric($this->batchNumber, 7);
+        $this->batchFooter = '8'.$this->NACHAFile->getScc().$this->NACHAFile->formatNumeric($this->detailRecordCount, 6).$this->NACHAFile->formatNumeric($this->getRoutingHash(), 10).$this->NACHAFile->formatNumeric(number_format($this->debitTotal, 2), 12).$this->NACHAFile->formatNumeric(number_format($this->creditTotal, 2), 12).$this->NACHAFile->formatText($this->NACHAFile->getCompanyId(), 10).$this->NACHAFile->formatText('', 25).substr($this->NACHAFile->getBankrt(), 0, 8).$this->NACHAFile->formatNumeric($this->batchNumber, 7);
         if (strlen($this->batchFooter) == 94) {
             $this->validBatchFooter = true;
         }
@@ -115,26 +116,17 @@ class NACHABatch {
     /**
      * @return int
      */
-    public function getDetailRecordCount()
+    public function getRoutingHash()
     {
-        return $this->detailRecordCount;
+        return $this->routingHash;
     }
-
 
     /**
-     * @return int
+     * @return string
      */
-    public function getCreditTotal()
+    public function getBatchNumber()
     {
-        return $this->creditTotal;
+        return $this->batchNumber;
     }
 
-
-    /**
-     * @return int
-     */
-    public function getDebitTotal()
-    {
-        return $this->debitTotal;
-    }
 }

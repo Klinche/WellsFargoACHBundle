@@ -34,8 +34,6 @@ class NACHAFile {
     private $fileId;
     private $companyId;
 
-    private $routingHash = 0;
-
     public $errorRecords = array();
     public $processedRecords = array();
     private $tranid = 0;
@@ -112,12 +110,6 @@ class NACHAFile {
         $this->createFileFooter();
         if (!$this->validFileHeader) {
             throw new \Exception('Invalid File Header');
-        }
-        if (!$this->validBatchHeader) {
-            throw new \Exception('Invalid Batch Header');
-        }
-        if (!$this->validBatchFooter) {
-            throw new \Exception('Invalid Batch Footer');
         }
         if (!$this->validFileFooter) {
             throw new \Exception('Invalid File Footer');
@@ -228,6 +220,7 @@ class NACHAFile {
         $detailRecordCount = 0;
         $debitTotal = 0;
         $creditTotal = 0;
+        $routingHashTotal = 0;
 
         /** @var NACHABatch $batch */
         foreach($this->batchItems as $batch) {
@@ -235,10 +228,11 @@ class NACHAFile {
             $detailRecordCount = $detailRecordCount + $batch->getDetailRecordCount();
             $debitTotal = $debitTotal + $batch->getDebitTotal();
             $creditTotal = $creditTotal + $batch->getCreditTotal();
+            $routingHashTotal = $routingHashTotal + $batch->getRoutingHash();
         }
 
         $blocks = ceil(($linecount)/10);
-        $this->fileFooter = '9'.$this->formatNumeric('1', 6).$this->formatNumeric($blocks, 6).$this->formatNumeric($detailRecordCount, 8).$this->formatNumeric($this->routingHash, 10).$this->formatNumeric(number_format($debitTotal, 2), 12).$this->formatNumeric(number_format($creditTotal, 2), 12).$this->formatText('', 39);
+        $this->fileFooter = '9'.$this->formatNumeric('1', 6).$this->formatNumeric($blocks, 6).$this->formatNumeric($detailRecordCount, 8).$this->formatNumeric($routingHashTotal, 10).$this->formatNumeric(number_format($debitTotal, 2), 12).$this->formatNumeric(number_format($creditTotal, 2), 12).$this->formatText('', 39);
         if (strlen($this->fileFooter) == 94) {
             $this->validFileFooter = true;
         }
@@ -375,13 +369,6 @@ class NACHAFile {
         return $this->companyId;
     }
 
-    /**
-     * @return int
-     */
-    public function getRoutingHash()
-    {
-        return $this->routingHash;
-    }
 
     /**
      * @return array
