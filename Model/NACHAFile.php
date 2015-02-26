@@ -33,10 +33,9 @@ class NACHAFile {
 
     private $fileId;
     private $companyId;
-    public $detailRecordCount = 0;
+
     private $routingHash = 0;
-    public $creditTotal = 0;
-    public $debitTotal = 0;
+
     public $errorRecords = array();
     public $processedRecords = array();
     private $tranid = 0;
@@ -44,22 +43,15 @@ class NACHAFile {
     private $filemodifier = 'A';
     private $originatingBank;
     private $companyName;
+
+
     private $scc = self::SERVICE_CLASS_CODE_200;
     private $sec = self::SEC_PPD;
     private $companyEntryDescription = 'PAYMENT';
     private $companyDescriptionDate;
     private $effectiveEntryDate;
-    private $securityRecord = '';
-    public $validSecurityRecord = false;
     private $fileHeader = '';
     public $validFileHeader = false;
-    private $batchHeader = '';
-    public $validBatchHeader = false;
-    private $companyDiscretionaryData = '';
-    private $batchLines = '';
-    private $batchNumber = '1';
-    private $batchFooter = '';
-    public $validBatchFooter = false;
     private $fileFooter = '';
     public $validFileFooter = false;
     private $recordsize = '094';
@@ -70,6 +62,12 @@ class NACHAFile {
     public $discretionaryData = '';
     private $applicationId = '';
     private $timezone = 'PST8PDT';
+
+    private $companyDiscretionaryData = '';
+
+    private $batchItems = array();
+
+
 
     /**
      */
@@ -96,8 +94,21 @@ class NACHAFile {
             $this->setFileModifier($fileModifier);
         }
         $this->createFileHeader();
-        $this->createBatchHeader();
-        $this->createBatchFooter();
+
+        $batchLines = "";
+
+        /** @var NACHABatch $batch */
+        foreach($this->batchItems as $batch) {
+            $batch->createBatchHeader();
+            $batch->createBatchFooter();
+
+            if(!$batch->validBatchFooter || !$batch->validBatchHeader) {
+                throw \Exception("Invalid batch section");
+
+            }
+            $batchLines = $batchLines."\n".$batch->getBatchHeader()."\n".$batch->getBatchLines().$batch->getBatchFooter();
+        }
+
         $this->createFileFooter();
         if (!$this->validFileHeader) {
             throw new \Exception('Invalid File Header');
@@ -111,7 +122,7 @@ class NACHAFile {
         if (!$this->validFileFooter) {
             throw new \Exception('Invalid File Footer');
         }
-        return $this->securityRecord."\n".$this->fileHeader."\n".$this->batchHeader."\n".$this->batchLines.$this->batchFooter."\n".$this->fileFooter;
+        return $this->fileHeader.$batchLines."\n".$this->fileFooter;
     }
 
     /**
@@ -120,7 +131,7 @@ class NACHAFile {
      * @param  NachaPaymentInfo $paymentInfo
      * @return bool
      */
-    public function addDebit(NachaPaymentInfo $paymentInfo)
+    public function addDebit(NachaPaymentInfo $paymentInfo, $secType = self::SEC_PPD)
     {
         if (is_null($paymentInfo)) {
             return false;
@@ -139,7 +150,7 @@ class NACHAFile {
                 $paymentInfo->setTransCode(self::CHECKING_DEBIT);
             }
         }
-        $this->addDetailLine($paymentInfo);
+        $this->addDetailLine($paymentInfo, $secType);
 
         return true;
     }
@@ -150,7 +161,7 @@ class NACHAFile {
      * @param  NachaPaymentInfo $paymentInfo
      * @return bool
      */
-    public function addCredit(NachaPaymentInfo $paymentInfo)
+    public function addCredit(NachaPaymentInfo $paymentInfo, $secType = self::SEC_PPD)
     {
         if (is_null($paymentInfo)) {
             return false;
@@ -168,17 +179,24 @@ class NACHAFile {
                 $paymentInfo->setTransCode(self::CHECKING_CREDIT);
             }
         }
-        return $this->addDetailLine($paymentInfo);
+        return $this->addDetailLine($paymentInfo, $secType);
     }
 
-    private function addDetailLine(NachaPaymentInfo $paymentInfo)
+    private function addDetailLine(NachaPaymentInfo $paymentInfo, $secType)
     {
         if (is_null($paymentInfo->getIndividualId()) || is_null($paymentInfo->getTotalAmount()) || is_null($paymentInfo->getBankAccountNumber()) || is_null($paymentInfo->getRoutingNumber()) || is_null($paymentInfo->getIndividualName()) || is_null($paymentInfo->getAccountType())) {
             return false;
         }
         $paymentInfo->setTranId($this->tranid+1);
 
-        if ($this->createDetailRecord($paymentInfo)) {
+
+        if(!isset($this->batchItems[$secType])) {
+            $this->batchItems[$secType] = new NACHABatch($this, $secType, count($this->batchItems) + 1);
+        }
+
+        $batchFile = $this->batchItems[$secType];
+
+        if ($batchFile->createDetailRecord($paymentInfo, $secType)) {
             array_push($this->processedRecords, $paymentInfo);
             $this->tranid++;
 
@@ -190,6 +208,75 @@ class NACHAFile {
             return false;
         }
     }
+
+
+    private function createFileHeader()
+    {
+        $this->fileHeader = '101 '.$this->bankrt.$this->fileId.$this->specialDate('ymdHi').$this->filemodifier.$this->recordsize.$this->blockingfactor.$this->formatcode.$this->formatText($this->originatingBank, 23).$this->formatText($this->companyName, 23).$this->formatText($this->referencecode, 8);
+        if (strlen($this->fileHeader) >=86  && strlen($this->fileHeader) <= 94) {
+            $this->validFileHeader = true;
+        }
+
+        return $this;
+    }
+
+
+
+    private function createFileFooter()
+    {
+        $linecount = 2;
+        $detailRecordCount = 0;
+        $debitTotal = 0;
+        $creditTotal = 0;
+
+        /** @var NACHABatch $batch */
+        foreach($this->batchItems as $batch) {
+            $linecount = $linecount + 2 + $batch->getDetailRecordCount();
+            $detailRecordCount = $detailRecordCount + $batch->getDetailRecordCount();
+            $debitTotal = $debitTotal + $batch->getDebitTotal();
+            $creditTotal = $creditTotal + $batch->getCreditTotal();
+        }
+
+        $blocks = ceil(($linecount)/10);
+        $this->fileFooter = '9'.$this->formatNumeric('1', 6).$this->formatNumeric($blocks, 6).$this->formatNumeric($detailRecordCount, 8).$this->formatNumeric($this->routingHash, 10).$this->formatNumeric(number_format($debitTotal, 2), 12).$this->formatNumeric(number_format($creditTotal, 2), 12).$this->formatText('', 39);
+        if (strlen($this->fileFooter) == 94) {
+            $this->validFileFooter = true;
+        }
+//        // Add any additional '9' lines to get something evenly divisable by 10.
+//        $fillersToAdd = ($blocks*10)-$linecount;
+//        for ($i = 0; $i<$fillersToAdd; $i++) {
+//            $this->fileFooter .= "\n".str_pad('', 94, '9');
+//        }
+
+        return $this;
+    }
+
+    public function specialDate($format, $timestamp = null)
+    {
+        $script_tz = date_default_timezone_get();
+
+        date_default_timezone_set($this->timezone);
+        if (is_null($timestamp)) {
+            $timestamp = time();
+        }
+        $date = date($format, $timestamp);
+        date_default_timezone_set($script_tz);
+
+        return $date;
+    }
+
+    public function formatText($txt, $spaces)
+    {
+        return substr(str_pad(strtoupper($txt), $spaces, ' ', STR_PAD_RIGHT), 0, $spaces);
+    }
+
+    public function formatNumeric($nums, $spaces)
+    {
+        return substr(str_pad(str_replace(array('.', ','), '', (string) $nums), $spaces, '0', STR_PAD_LEFT), ($spaces)*-1);
+    }
+
+
+    #region "Main File"
 
     public function setFileModifier($fileModifier)
     {
@@ -260,96 +347,243 @@ class NACHAFile {
         return $this;
     }
 
-    private function createFileHeader()
-    {
-        $this->fileHeader = '101 '.$this->bankrt.$this->fileId.$this->specialDate('ymdHi').$this->filemodifier.$this->recordsize.$this->blockingfactor.$this->formatcode.$this->formatText($this->originatingBank, 23).$this->formatText($this->companyName, 23).$this->formatText($this->referencecode, 8);
-        if (strlen($this->fileHeader) >=86  && strlen($this->fileHeader) <= 94) {
-            $this->validFileHeader = true;
-        }
+    #endregion
 
-        return $this;
+    #region "Data"
+
+    /**
+     * @return string
+     */
+    public function getCompanyDiscretionaryData()
+    {
+        return $this->companyDiscretionaryData;
     }
 
-    private function createBatchHeader()
+    /**
+     * @return mixed
+     */
+    public function getFileId()
     {
-        $this->batchHeader = '5'.$this->scc.$this->formatText($this->companyName, 16).$this->formatText($this->companyDiscretionaryData, 20).$this->companyId.$this->sec.$this->formatText($this->companyEntryDescription, 10).$this->formatText($this->companyDescriptionDate, 6).$this->effectiveEntryDate.'   1'.substr($this->bankrt, 0, 8).$this->formatNumeric($this->batchNumber, 7);
-        if (strlen($this->batchHeader) == 94) {
-            $this->validBatchHeader = true;
-        }
-
-        return $this;
+        return $this->fileId;
     }
 
-    private function createDetailRecord(NachaPaymentInfo $info)
+    /**
+     * @return mixed
+     */
+    public function getCompanyId()
     {
-        $line = '6'.$info->getTransCode().$info->getRoutingNumber().$this->formatText($info->getBankAccountNumber(), 17).$this->formatNumeric(number_format($info->getTotalAmount(), 2), 10).$this->formatText($info->getIndividualId(), 15).$this->formatText($info->getIndividualName(), 22).$this->formatText($this->discretionaryData, 2).'0'.substr($this->bankrt, 0, 8).$this->formatNumeric($info->getTranId(), 7);
-
-        if (strlen($line) == 94) {
-            $this->batchLines .= $line."\n";
-            $this->detailRecordCount++;
-            $this->routingHash += (int) substr($info->getRoutingNumber(), 0, 8);
-            if ($info->getTransCode() == self::CHECKING_DEBIT || $info->getTransCode() == self::SAVINGS_DEBIT) {
-                $this->debitTotal += (float) $info->getTotalAmount();
-            } else {
-                $this->creditTotal += (float) $info->getTotalAmount();
-            }
-
-            return true;
-        }
-
-        return false;
+        return $this->companyId;
     }
 
-    private function createBatchFooter()
+    /**
+     * @return int
+     */
+    public function getRoutingHash()
     {
-        $this->batchFooter = '8'.$this->scc.$this->formatNumeric($this->detailRecordCount, 6).$this->formatNumeric($this->routingHash, 10).$this->formatNumeric(number_format($this->debitTotal, 2), 12).$this->formatNumeric(number_format($this->creditTotal, 2), 12).$this->formatText($this->companyId, 10).$this->formatText('', 25).substr($this->bankrt, 0, 8).$this->formatNumeric($this->batchNumber, 7);
-        if (strlen($this->batchFooter) == 94) {
-            $this->validBatchFooter = true;
-        }
-
-        return $this;
+        return $this->routingHash;
     }
 
-    private function createFileFooter()
+    /**
+     * @return array
+     */
+    public function getErrorRecords()
     {
-        $linecount = $this->detailRecordCount+4;
-        $blocks = ceil(($linecount)/10);
-        $this->fileFooter = '9'.$this->formatNumeric('1', 6).$this->formatNumeric($blocks, 6).$this->formatNumeric($this->detailRecordCount, 8).$this->formatNumeric($this->routingHash, 10).$this->formatNumeric(number_format($this->debitTotal, 2), 12).$this->formatNumeric(number_format($this->creditTotal, 2), 12).$this->formatText('', 39);
-        if (strlen($this->fileFooter) == 94) {
-            $this->validFileFooter = true;
-        }
-//        // Add any additional '9' lines to get something evenly divisable by 10.
-//        $fillersToAdd = ($blocks*10)-$linecount;
-//        for ($i = 0; $i<$fillersToAdd; $i++) {
-//            $this->fileFooter .= "\n".str_pad('', 94, '9');
-//        }
-
-        return $this;
+        return $this->errorRecords;
     }
 
-    private function specialDate($format, $timestamp = null)
+    /**
+     * @return array
+     */
+    public function getProcessedRecords()
     {
-        $script_tz = date_default_timezone_get();
-
-        date_default_timezone_set($this->timezone);
-        if (is_null($timestamp)) {
-            $timestamp = time();
-        }
-        $date = date($format, $timestamp);
-        date_default_timezone_set($script_tz);
-
-        return $date;
+        return $this->processedRecords;
     }
 
-    private function formatText($txt, $spaces)
+    /**
+     * @return int
+     */
+    public function getTranid()
     {
-        return substr(str_pad(strtoupper($txt), $spaces, ' ', STR_PAD_RIGHT), 0, $spaces);
+        return $this->tranid;
     }
 
-    private function formatNumeric($nums, $spaces)
+    /**
+     * @return mixed
+     */
+    public function getBankrt()
     {
-        return substr(str_pad(str_replace(array('.', ','), '', (string) $nums), $spaces, '0', STR_PAD_LEFT), ($spaces)*-1);
+        return $this->bankrt;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getOriginatingBank()
+    {
+        return $this->originatingBank;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCompanyName()
+    {
+        return $this->companyName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getScc()
+    {
+        return $this->scc;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSec()
+    {
+        return $this->sec;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCompanyEntryDescription()
+    {
+        return $this->companyEntryDescription;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCompanyDescriptionDate()
+    {
+        return $this->companyDescriptionDate;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEffectiveEntryDate()
+    {
+        return $this->effectiveEntryDate;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSecurityRecord()
+    {
+        return $this->securityRecord;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isValidSecurityRecord()
+    {
+        return $this->validSecurityRecord;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileHeader()
+    {
+        return $this->fileHeader;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isValidFileHeader()
+    {
+        return $this->validFileHeader;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileFooter()
+    {
+        return $this->fileFooter;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isValidFileFooter()
+    {
+        return $this->validFileFooter;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRecordsize()
+    {
+        return $this->recordsize;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBlockingfactor()
+    {
+        return $this->blockingfactor;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFormatcode()
+    {
+        return $this->formatcode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getReferencecode()
+    {
+        return $this->referencecode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileContents()
+    {
+        return $this->fileContents;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDiscretionaryData()
+    {
+        return $this->discretionaryData;
+    }
+
+    /**
+     * @return string
+     */
+    public function getApplicationId()
+    {
+        return $this->applicationId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTimezone()
+    {
+        return $this->timezone;
+    }
+
+    #endregion
 
 
 }
