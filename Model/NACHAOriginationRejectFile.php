@@ -60,7 +60,7 @@ class NACHAOriginationRejectFile {
                 case '6':
                     $type6Record = new Type6Record();
                     $type6Record->parseLine($line);
-                    $entryDetailRecords[] = $type6Record;
+                    $this->entryDetailRecords[] = $type6Record;
                     if (!is_null($currentCompanyBatchRecord)) {
                         $currentCompanyBatchRecord->addEntryDetailRecord($type6Record);
                     }
@@ -103,8 +103,9 @@ class NACHAOriginationRejectFile {
      */
     public function getType6RecordWithIndividualID($individualID) {
         /** @var Type6Record $entryDetailRecord */
-        foreach ($this->getEntryDetailRecords() as $entryDetailRecord) {
-            if ($individualID == $entryDetailRecord->getIndividualId()) {
+        foreach ($this->getEntryDetailRecords() as $entryDetailRecord)
+        {
+            if (strtolower($individualID) == strtolower($entryDetailRecord->getIndividualId())) {
                 return $entryDetailRecord;
             }
         }

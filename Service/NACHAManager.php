@@ -128,8 +128,7 @@ class NACHAManager {
         $inboundConnectionURL = 'ssh2.sftp://'.$sftp.'/'.$this->wellsFargoTransmissionInboundFolder;
         $inboundFolderHandle = opendir($inboundConnectionURL);
 
-        $script_tz = date_default_timezone_get();
-        date_default_timezone_set('PST8PDT');
+
         $now = new \Datetime('now', new \DateTimeZone('PST8PDT'));
         $now->setTime(0, 0, 0);
 
@@ -146,8 +145,6 @@ class NACHAManager {
         $nachaFile->setFileModifier($fileModifier);
 
         $nachaFileContents = $nachaFile->generateFileContents();
-
-        date_default_timezone_set($script_tz);
 
         if (is_null($nachaFileContents)) {
             $this->logger->info('The nacha file had no contents.');
@@ -239,9 +236,6 @@ class NACHAManager {
 
         $outboundFolderHandle = opendir($returnsReportConnectionURL);
 
-        $script_tz = date_default_timezone_get();
-        date_default_timezone_set('PST8PDT');
-
         /** @var \DateTime $dateTime */
         foreach($dateTimes as &$dateTime) {
             $dateTime->setTimezone(new \DateTimeZone('PST8PDT'));
@@ -271,7 +265,7 @@ class NACHAManager {
                 continue;
             }
 
-            $creationDate = new \DateTime($originationRejectFile->getFileHeader()->getFileCreationDate(), new \DateTimeZone('PST8PDT'));
+            $creationDate = $originationRejectFile->getFileHeader()->getFileCreationDateTime();
             $creationDate->setTime(0, 0, 0);
 
             if(in_array($creationDate, $dateTimes)) {
@@ -280,8 +274,6 @@ class NACHAManager {
         }
 
         closedir($outboundFolderHandle);
-
-        date_default_timezone_set($script_tz);
 
         return $originationFilesToProcess;
     }

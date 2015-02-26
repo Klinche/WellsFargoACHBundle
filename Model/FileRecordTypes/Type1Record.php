@@ -25,6 +25,9 @@ class Type1Record
     /** @var string|null */
     private $fileCreationTime = null;
 
+    /** @var \DateTime|null */
+    private $fileCreationDateTime = null;
+
     /** @var string|null */
     private $fileIdModifier = null;
 
@@ -97,6 +100,8 @@ class Type1Record
         if(substr($line, 79, 4) == 'REJ0') {
             $this->setErrorCode(substr($line, 83, 4));
         }
+
+        $this->fileCreationDateTime = \DateTime::createFromFormat('ymd Hi', $this->getFileCreationDate().' '.$this->getFileCreationTime(), new \DateTimeZone('PST8PDT'));
     }
 
 
@@ -290,6 +295,14 @@ class Type1Record
     private function setReferenceCode($referenceCode)
     {
         $this->referenceCode = $referenceCode;
+    }
+
+    /**
+     * @return \DateTime|null
+     */
+    public function getFileCreationDateTime()
+    {
+        return $this->fileCreationDateTime;
     }
 
     /**
