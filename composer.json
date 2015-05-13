@@ -1,5 +1,5 @@
 {
-  "name": "dabsquared/wells-fargo-ach-bundle",
+  "name": "klinche/wells-fargo-ach-bundle",
   "type": "symfony-bundle",
   "description": "This bundle is used to help communicate with the Wells Fargo ACH Service",
   "keywords": [
@@ -20,8 +20,8 @@
       "email": "daniel_brooks@dabsquared.com"
     },
     {
-      "name": "DABSquared",
-      "homepage": "https://github.com/DABSquared"
+      "name": "Klinche",
+      "homepage": "https://github.com/Klinche"
     }
   ],
   "autoload": {
