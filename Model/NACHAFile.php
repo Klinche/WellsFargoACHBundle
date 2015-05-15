@@ -101,7 +101,7 @@ class NACHAFile {
             $batch->createBatchFooter();
 
             if(!$batch->validBatchFooter || !$batch->validBatchHeader) {
-                throw \Exception("Invalid batch section");
+                throw new \Exception("Invalid batch section Header:   ".$batch->getBatchHeader()." Footer:   ".$batch->getBatchFooter());
 
             }
             $batchLines = $batchLines."\n".$batch->getBatchHeader()."\n".$batch->getBatchLines().$batch->getBatchFooter();
@@ -109,10 +109,10 @@ class NACHAFile {
 
         $this->createFileFooter();
         if (!$this->validFileHeader) {
-            throw new \Exception('Invalid File Header');
+            throw new \Exception('Invalid File Header: '.$this->fileHeader);
         }
         if (!$this->validFileFooter) {
-            throw new \Exception('Invalid File Footer');
+            throw new \Exception('Invalid File Footer: '.$this->fileFooter);
         }
         return $this->fileHeader.$batchLines."\n".$this->fileFooter;
     }
