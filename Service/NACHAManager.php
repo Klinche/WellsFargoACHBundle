@@ -113,7 +113,7 @@ class NACHAManager {
      */
     public function uploadNACHAFile(NACHAFile $nachaFile)
     {
-        $this->logger->info('Starting Upload of Wells Fargo NACHA File');
+        $this->logger->notice('Starting Upload of Wells Fargo NACHA File');
 
 
         $connection = ssh2_connect($this->wellsFargoTransmissionHost, 22, array('hostkey'=>'ssh-rsa'));
@@ -147,7 +147,7 @@ class NACHAManager {
         $nachaFileContents = $nachaFile->generateFileContents();
 
         if (is_null($nachaFileContents)) {
-            $this->logger->info('The nacha file had no contents.');
+            $this->logger->notice('The nacha file had no contents.');
             return;
         }
 
@@ -169,7 +169,7 @@ class NACHAManager {
             return;
         }
 
-        $this->logger->info('Finished Upload of Wells Fargo NACHA File');
+        $this->logger->notice('Finished Upload of Wells Fargo NACHA File');
     }
 
 
@@ -195,7 +195,7 @@ class NACHAManager {
      */
     public function processWellsFargoReportForDateTimes(array $dateTimes, $searchArchives = false)
     {
-        $this->logger->info('Starting Processing of Wells Fargo NACHA Report');
+        $this->logger->notice('Starting Processing of Wells Fargo NACHA Report');
 
 
         $connection = ssh2_connect($this->wellsFargoTransmissionHost, 22, array('hostkey'=>'ssh-rsa'));
@@ -220,7 +220,7 @@ class NACHAManager {
             }
         }
 
-        $this->logger->info('Finished Processing of Wells Fargo NACHA Report');
+        $this->logger->notice('Finished Processing of Wells Fargo NACHA Report');
 
         return $originationFilesToProcess;
     }
