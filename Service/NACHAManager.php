@@ -129,8 +129,7 @@ class NACHAManager {
         $inboundFolderHandle = opendir($inboundConnectionURL);
 
 
-        $now = new \Datetime('now', new \DateTimeZone('PST8PDT'));
-        $now->setTime(0, 0, 0);
+        $now = new \DateTime('now', new \DateTimeZone('PST8PDT'));
 
         $fivePm = new \DateTime('now', new \DateTimeZone('PST8PDT'));
         $fivePm->setTime(17, 0, 0);
@@ -138,7 +137,7 @@ class NACHAManager {
         if ($now > $fivePm) {
             $now = $now->add(new \DateInterval('P1D'));
         }
-        
+
         $now->setTime(0, 0, 0);
 
         $fileModifier = 'A';
@@ -153,7 +152,7 @@ class NACHAManager {
                 $fileModifier = "A";
             }
         }
-
+        
         $nachaFile->setFileModifier($fileModifier);
 
         $nachaFileContents = $nachaFile->generateFileContents();

@@ -60,6 +60,7 @@ class NACHAFile {
     public $discretionaryData = '';
     private $applicationId = '';
     private $timezone = 'PST8PDT';
+    private $creationDate = '';
 
     private $companyDiscretionaryData = '';
 
@@ -204,7 +205,7 @@ class NACHAFile {
 
     private function createFileHeader()
     {
-        $this->fileHeader = '101 '.$this->bankrt.$this->fileId.$this->specialDate('ymdHi').$this->filemodifier.$this->recordsize.$this->blockingfactor.$this->formatcode.$this->formatText($this->originatingBank, 23).$this->formatText($this->companyName, 23).$this->formatText($this->referencecode, 8);
+        $this->fileHeader = '101 '.$this->bankrt.$this->fileId.$this->creationDate.$this->filemodifier.$this->recordsize.$this->blockingfactor.$this->formatcode.$this->formatText($this->originatingBank, 23).$this->formatText($this->companyName, 23).$this->formatText($this->referencecode, 8);
         if (strlen($this->fileHeader) >=86  && strlen($this->fileHeader) <= 94) {
             $this->validFileHeader = true;
         }
@@ -245,18 +246,15 @@ class NACHAFile {
         return $this;
     }
 
-    public function specialDate($format, $timestamp = null)
+    public function specialDate($format, $date = null)
     {
-        $script_tz = date_default_timezone_get();
-
-        date_default_timezone_set($this->timezone);
-        if (is_null($timestamp)) {
-            $timestamp = time();
+        if (is_null($date)) {
+            $date = new \DateTime('now', new \DateTimeZone('PST8PDT'));
         }
-        $date = date($format, $timestamp);
-        date_default_timezone_set($script_tz);
 
-        return $date;
+        $date->setTimezone(new \DateTimeZone('PST8PDT'));
+
+        return $date->format($format);
     }
 
     public function formatText($txt, $spaces)
@@ -282,6 +280,18 @@ class NACHAFile {
     public function getFileModifier()
     {
         return $this->filemodifier;
+    }
+
+    public function setFileCreationDate($creationDate)
+    {
+        $this->creationDate = $this->specialDate('ymdHi', $creationDate);
+
+        return $this;
+    }
+
+    public function getFileCreationDate()
+    {
+        return $this->creationDate;
     }
 
     public function setServiceClassCode($scc)
@@ -311,7 +321,7 @@ class NACHAFile {
             $this->companyEntryDescription = $des;
         }
         if ($date) {
-            $this->companyDescriptionDate = $this->specialDate('M d', strtotime($date));
+            $this->companyDescriptionDate = $this->specialDate('M d', $date);
         }
 
         return $this;
@@ -329,7 +339,7 @@ class NACHAFile {
 
     public function setEffectiveEntryDate($date)
     {
-        $this->effectiveEntryDate = $this->specialDate('ymd', strtotime($date));
+        $this->effectiveEntryDate = $this->specialDate('ymd', $date);
 
         return $this;
     }
