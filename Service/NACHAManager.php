@@ -132,6 +132,14 @@ class NACHAManager {
         $now = new \Datetime('now', new \DateTimeZone('PST8PDT'));
         $now->setTime(0, 0, 0);
 
+        $fivePm = new \DateTime('now', new \DateTimeZone('PST8PDT'));
+        $fivePm->setTime(17, 0, 0);
+
+        if ($now > $fivePm) {
+            $now->setTime(0, 0, 0);
+            $now = $now->add(new \DateInterval('P1D'));
+        }
+
         $fileModifier = 'A';
 
         while (false !== ($file = readdir($inboundFolderHandle))) {
@@ -139,6 +147,9 @@ class NACHAManager {
             $fileCreationTime->setTime(0, 0, 0);
             if ($fileCreationTime == $now) {
                 $fileModifier++;
+            }
+            if ($fileModifier == 'AA') {
+                $fileModifier = "A";
             }
         }
 
