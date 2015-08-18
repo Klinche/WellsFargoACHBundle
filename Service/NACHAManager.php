@@ -136,9 +136,10 @@ class NACHAManager {
         $fivePm->setTime(17, 0, 0);
 
         if ($now > $fivePm) {
-            $now->setTime(0, 0, 0);
             $now = $now->add(new \DateInterval('P1D'));
         }
+        
+        $now->setTime(0, 0, 0);
 
         $fileModifier = 'A';
 
