@@ -39,7 +39,9 @@ class WellsFargoACHExtension extends Extension {
         $loader->load('services.xml');
 
         $container->setParameter('wellsfargo.routing_number', $config['routing_number']);
-        $container->setParameter('wellsfargo.company_id', $config['company_id']);
+        $container->setParameter('wellsfargo.credit_company_id', $config['credit_company_id']);
+        $container->setParameter('wellsfargo.debit_company_id', $config['debit_company_id']);
+
         $container->setParameter('wellsfargo.application_id', $config['application_id']);
         $container->setParameter('wellsfargo.file_id', $config['file_id']);
         $container->setParameter('wellsfargo.originating_bank', $config['originating_bank']);

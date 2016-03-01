@@ -32,7 +32,8 @@ class Configuration implements ConfigurationInterface
         $this->root
             ->children()
                 ->scalarNode('routing_number')->isRequired()->end()
-                ->scalarNode('company_id')->isRequired()->end()
+                ->scalarNode('credit_company_id')->isRequired()->end()
+                ->scalarNode('debit_company_id')->isRequired()->end()
                 ->scalarNode('application_id')->isRequired()->end()
                 ->scalarNode('file_id')->isRequired()->end()
                 ->scalarNode('originating_bank')->isRequired()->end()
