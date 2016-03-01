@@ -10,6 +10,7 @@ namespace WellsFargo\ACHBundle\Model;
 
 class NACHABatch {
 
+    private $transCode = null;
 
 
     private $batchHeader = '';
@@ -29,15 +30,23 @@ class NACHABatch {
 
     private $batchNumber = '1';
 
-    public function __construct(NACHAFile $NACHAFile, $secType, $batchNumber) {
+    public function __construct(NACHAFile $NACHAFile, $secType, $transCode, $batchNumber) {
         $this->NACHAFile = $NACHAFile;
         $this->secType = $secType;
         $this->batchNumber = $batchNumber;
+        $this->transCode = $transCode;
     }
 
     public function createBatchHeader()
     {
-        $this->batchHeader = '5'.$this->NACHAFile->getScc().$this->NACHAFile->formatText($this->NACHAFile->getCompanyName(), 16).$this->NACHAFile->formatText($this->NACHAFile->getCompanyDiscretionaryData(), 20).$this->NACHAFile->getCompanyId().$this->secType.$this->NACHAFile->formatText($this->NACHAFile->getCompanyEntryDescription(), 10).$this->NACHAFile->formatText($this->NACHAFile->getCompanyDescriptionDate(), 6).$this->NACHAFile->getEffectiveEntryDate().'   1'.substr($this->NACHAFile->getBankrt(), 0, 8).$this->NACHAFile->formatNumeric($this->batchNumber, 7);
+        $companyId = null;
+        if ($this->transCode == NachaFile::CHECKING_CREDIT || NACHAFile::SAVINGS_CREDIT) {
+            $companyId = $this->NACHAFile->getCreditCompanyId();
+        } else {
+            $companyId = $this->NACHAFile->getDebitCompanyId();
+        }
+
+        $this->batchHeader = '5'.$this->NACHAFile->getScc().$this->NACHAFile->formatText($this->NACHAFile->getCompanyName(), 16).$this->NACHAFile->formatText($this->NACHAFile->getCompanyDiscretionaryData(), 20).$companyId.$this->secType.$this->NACHAFile->formatText($this->NACHAFile->getCompanyEntryDescription(), 10).$this->NACHAFile->formatText($this->NACHAFile->getCompanyDescriptionDate(), 6).$this->NACHAFile->getEffectiveEntryDate().'   1'.substr($this->NACHAFile->getBankrt(), 0, 8).$this->NACHAFile->formatNumeric($this->batchNumber, 7);
         if (strlen($this->batchHeader) == 94) {
             $this->validBatchHeader = true;
         }
@@ -67,7 +76,14 @@ class NACHABatch {
 
     public function createBatchFooter()
     {
-        $this->batchFooter = '8'.$this->NACHAFile->getScc().$this->NACHAFile->formatNumeric($this->detailRecordCount, 6).$this->NACHAFile->formatNumeric($this->getRoutingHash(), 10).$this->NACHAFile->formatNumeric(number_format($this->debitTotal, 2), 12).$this->NACHAFile->formatNumeric(number_format($this->creditTotal, 2), 12).$this->NACHAFile->formatText($this->NACHAFile->getCompanyId(), 10).$this->NACHAFile->formatText('', 25).substr($this->NACHAFile->getBankrt(), 0, 8).$this->NACHAFile->formatNumeric($this->batchNumber, 7);
+        $companyId = null;
+        if ($this->transCode == NachaFile::CHECKING_CREDIT || NACHAFile::SAVINGS_CREDIT) {
+            $companyId = $this->NACHAFile->getCreditCompanyId();
+        } else {
+            $companyId = $this->NACHAFile->getDebitCompanyId();
+        }
+
+        $this->batchFooter = '8'.$this->NACHAFile->getScc().$this->NACHAFile->formatNumeric($this->detailRecordCount, 6).$this->NACHAFile->formatNumeric($this->getRoutingHash(), 10).$this->NACHAFile->formatNumeric(number_format($this->debitTotal, 2), 12).$this->NACHAFile->formatNumeric(number_format($this->creditTotal, 2), 12).$this->NACHAFile->formatText($companyId, 10).$this->NACHAFile->formatText('', 25).substr($this->NACHAFile->getBankrt(), 0, 8).$this->NACHAFile->formatNumeric($this->batchNumber, 7);
         if (strlen($this->batchFooter) == 94) {
             $this->validBatchFooter = true;
         }

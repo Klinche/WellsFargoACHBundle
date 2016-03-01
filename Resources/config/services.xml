@@ -8,6 +8,8 @@
 
         <service id="wellsfargo.achbundle.nachamanager" class="WellsFargo\ACHBundle\Service\NACHAManager" public="true">
             <argument>%wellsfargo.routing_number%</argument>
+            <argument>%wellsfargo.credit_company_id%</argument>
+            <argument>%wellsfargo.debit_company_id%</argument>
             <argument>%wellsfargo.company_id%</argument>
             <argument>%wellsfargo.application_id%</argument>
             <argument>%wellsfargo.file_id%</argument>

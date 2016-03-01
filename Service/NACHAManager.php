@@ -19,7 +19,10 @@ class NACHAManager {
     private $bankrt;
 
     /** @var  string  */
-    private $companyId;
+    private $creditCompanyId;
+
+    /** @var  string  */
+    private $debitCompanyId;
 
     /** @var  string  */
     private $applicationId;
@@ -70,10 +73,11 @@ class NACHAManager {
     /** @var $logger \Monolog\Logger */
     private $logger;
 
-    public function __construct($routingNumber, $companyId, $applicationId, $fileId, $originatingBank, $companyName, $wellsFargoTransmissionHost, $wellsFargoTransmissionUsername, $wellsFargoTransmissionPrivateKey, $wellsFargoTransmissionPrivateKeyPassword, $wellsFargoTransmissionPublicKey, $wellsFargoTransmissionInboundFolder, $wellsFargoTransmissionOutboundFolder, $wellsFargoTransmissionReturnsReportFolder, $wellsFargoTransmissionArchiveInboundFolder, $wellsFargoTransmissionArchiveOutboundFolder, $wellsFargoTransmissionArchiveReturnsReportFolder,  $logger)
+    public function __construct($routingNumber, $creditCompanyId, $debitCompanyId, $applicationId, $fileId, $originatingBank, $companyName, $wellsFargoTransmissionHost, $wellsFargoTransmissionUsername, $wellsFargoTransmissionPrivateKey, $wellsFargoTransmissionPrivateKeyPassword, $wellsFargoTransmissionPublicKey, $wellsFargoTransmissionInboundFolder, $wellsFargoTransmissionOutboundFolder, $wellsFargoTransmissionReturnsReportFolder, $wellsFargoTransmissionArchiveInboundFolder, $wellsFargoTransmissionArchiveOutboundFolder, $wellsFargoTransmissionArchiveReturnsReportFolder,  $logger)
     {
         $this->bankrt = $routingNumber;
-        $this->companyId = $companyId;
+        $this->creditCompanyId = $creditCompanyId;
+        $this->debitCompanyId = $debitCompanyId;
         $this->applicationId = $applicationId;
         $this->fileId = $fileId;
         $this->originatingBank = $originatingBank;
@@ -101,7 +105,7 @@ class NACHAManager {
      * @return NACHAFile
      */
     public function createNACHAFile() {
-        return new NACHAFile($this->bankrt, $this->companyId, $this->applicationId, $this->fileId, $this->originatingBank, $this->companyName);
+        return new NACHAFile($this->bankrt, $this->debitCompanyId, $this->creditCompanyId, $this->applicationId, $this->fileId, $this->originatingBank, $this->companyName);
     }
 
 

@@ -32,7 +32,8 @@ class NACHAFile {
     const SEC_CTX = 'CTX';
 
     private $fileId;
-    private $companyId;
+    private $creditCompanyId;
+    private $debitCompanyId;
 
     public $errorRecords = array();
     public $processedRecords = array();
@@ -64,16 +65,20 @@ class NACHAFile {
 
     private $companyDiscretionaryData = '';
 
+    /**
+     * @var NACHABatch[]
+     */
     private $batchItems = array();
 
 
 
     /**
      */
-    public function __construct($routingNumber, $companyId, $applicationId, $fileId, $originatingBank, $companyName)
+    public function __construct($routingNumber, $creditCompanyId, $debitCompanyId, $applicationId, $fileId, $originatingBank, $companyName)
     {
         $this->bankrt = $routingNumber;
-        $this->companyId = $companyId;
+        $this->creditCompanyId = $creditCompanyId;
+        $this->debitCompanyId = $debitCompanyId;
         $this->applicationId = $applicationId;
         $this->fileId = $fileId;
         $this->originatingBank = $originatingBank;
@@ -182,14 +187,17 @@ class NACHAFile {
         }
         $paymentInfo->setTranId($this->tranid+1);
 
+        $transCode = $paymentInfo->getTransCode();
 
-        if(!isset($this->batchItems[$secType])) {
-            $this->batchItems[$secType] = new NACHABatch($this, $secType, count($this->batchItems) + 1);
+        $type = $secType.'_'.$transCode;
+
+        if(!isset($this->batchItems[$type])) {
+            $this->batchItems[$type] = new NACHABatch($this, $secType, $transCode, count($this->batchItems) + 1);
         }
 
-        $batchFile = $this->batchItems[$secType];
+        $batchFile = $this->batchItems[$type];
 
-        if ($batchFile->createDetailRecord($paymentInfo, $secType)) {
+        if ($batchFile->createDetailRecord($paymentInfo)) {
             array_push($this->processedRecords, $paymentInfo);
             $this->tranid++;
 
@@ -364,19 +372,11 @@ class NACHAFile {
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getFileId()
     {
         return $this->fileId;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCompanyId()
-    {
-        return $this->companyId;
     }
 
 
@@ -405,7 +405,7 @@ class NACHAFile {
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getBankrt()
     {
@@ -413,7 +413,7 @@ class NACHAFile {
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getOriginatingBank()
     {
@@ -421,7 +421,24 @@ class NACHAFile {
     }
 
     /**
-     * @return mixed
+     * @return string
+     */
+    public function getCreditCompanyId()
+    {
+        return $this->creditCompanyId;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getDebitCompanyId()
+    {
+        return $this->debitCompanyId;
+    }
+
+    /**
+     * @return string
      */
     public function getCompanyName()
     {
@@ -466,22 +483,6 @@ class NACHAFile {
     public function getEffectiveEntryDate()
     {
         return $this->effectiveEntryDate;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSecurityRecord()
-    {
-        return $this->securityRecord;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isValidSecurityRecord()
-    {
-        return $this->validSecurityRecord;
     }
 
     /**
