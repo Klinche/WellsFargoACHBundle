@@ -40,7 +40,8 @@ class NACHABatch {
     public function createBatchHeader()
     {
         $companyId = null;
-        if ($this->transCode == NachaFile::CHECKING_CREDIT || NACHAFile::SAVINGS_CREDIT) {
+
+        if ($this->transCode == NachaFile::CHECKING_CREDIT || $this->transCode == NACHAFile::SAVINGS_CREDIT) {
             $companyId = $this->NACHAFile->getCreditCompanyId();
         } else {
             $companyId = $this->NACHAFile->getDebitCompanyId();
@@ -77,7 +78,7 @@ class NACHABatch {
     public function createBatchFooter()
     {
         $companyId = null;
-        if ($this->transCode == NachaFile::CHECKING_CREDIT || NACHAFile::SAVINGS_CREDIT) {
+        if ($this->transCode == NachaFile::CHECKING_CREDIT || $this->transCode == NACHAFile::SAVINGS_CREDIT) {
             $companyId = $this->NACHAFile->getCreditCompanyId();
         } else {
             $companyId = $this->NACHAFile->getDebitCompanyId();
