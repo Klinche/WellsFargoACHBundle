@@ -105,7 +105,7 @@ class NACHAManager {
      * @return NACHAFile
      */
     public function createNACHAFile() {
-        return new NACHAFile($this->bankrt, $this->debitCompanyId, $this->creditCompanyId, $this->applicationId, $this->fileId, $this->originatingBank, $this->companyName);
+        return new NACHAFile($this->bankrt, $this->creditCompanyId, $this->debitCompanyId, $this->applicationId, $this->fileId, $this->originatingBank, $this->companyName);
     }
 
 
