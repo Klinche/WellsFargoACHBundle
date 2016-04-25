@@ -251,11 +251,17 @@ class NACHAManager {
 
         $outboundFolderHandle = opendir($returnsReportConnectionURL);
 
+        $newDateTimes = array();
+
         /** @var \DateTime $dateTime */
-        foreach($dateTimes as &$dateTime) {
-            $dateTime->setTimezone(new \DateTimeZone('PST8PDT'));
-            $dateTime->setTime(0, 0, 0);
+        foreach($dateTimes as $dateTime) {
+            $time = new \DateTime($dateTime);
+            $time->setTimezone(new \DateTimeZone('PST8PDT'));
+            $time->setTime(0, 0, 0);
+            $newDateTimes[] = $time;
         }
+        $dateTimes = $newDateTimes;
+
         $originationFilesToProcess = array();
 
         while (false !== ($file = readdir($outboundFolderHandle))) {
