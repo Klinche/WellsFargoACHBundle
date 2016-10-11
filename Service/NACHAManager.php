@@ -147,7 +147,16 @@ class NACHAManager {
         $fileModifier = 'A';
 
         while (false !== ($file = readdir($inboundFolderHandle))) {
-            $fileCreationTime = new \DateTime(date("F d Y H:i:s.", filemtime($inboundConnectionURL.'/'.$file)), new \DateTimeZone('PST8PDT'));
+            $fileCreationTime = new \DateTime("now", new \DateTimeZone('PST8PDT'));
+
+            try {
+                $statinfo = ssh2_sftp_stat($sftp, $inboundConnectionURL.'/'.$file);
+                $mtime = $statinfo['mtime'];
+                $fileCreationTime = new \DateTime(date("F d Y H:i:s.", $mtime, new \DateTimeZone('PST8PDT')));
+            } catch (\ErrorException $ex) {
+                $this->logger->crit('Unable to determine nacha file mtime');
+            }
+
             $fileCreationTime->setTime(0, 0, 0);
             if ($fileCreationTime == $now) {
                 $fileModifier++;
