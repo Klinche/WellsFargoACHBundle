@@ -150,11 +150,22 @@ class NACHAManager {
             $fileCreationTime = new \DateTime("now", new \DateTimeZone('PST8PDT'));
 
             try {
-                $statinfo = ssh2_sftp_stat($sftp, $inboundConnectionURL.'/'.$file);
-                $mtime = $statinfo['mtime'];
-                $fileCreationTime = new \DateTime(date("F d Y H:i:s.", $mtime, new \DateTimeZone('PST8PDT')));
+                $path_parts = pathinfo($file);
+                $filename = $path_parts['filename'];
+                $date = str_replace('nacha-', "", $filename);
+                $fileCreationTime = new \DateTime(date("M-d-Y", $date, new \DateTimeZone('PST8PDT')));
             } catch (\ErrorException $ex) {
-                $this->logger->crit('Unable to determine nacha file mtime');
+                $this->logger->crit('Unable to determine nacha file with path name');
+            }
+
+            try {
+                $statinfo = ssh2_sftp_stat($sftp, $inboundConnectionURL.'/'.$file);
+                if (array_key_exists('mtime', $statinfo) && $statinfo['mtime'] !== null) {
+                    $mtime = $statinfo['mtime'];
+                    $fileCreationTime = new \DateTime(date("F d Y H:i:s.", $mtime, new \DateTimeZone('PST8PDT')));
+                }
+            } catch (\ErrorException $ex) {
+                $this->logger->crit('Unable to determine nacha file with mtime');
             }
 
             $fileCreationTime->setTime(0, 0, 0);
