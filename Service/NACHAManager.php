@@ -147,19 +147,10 @@ class NACHAManager {
         $fileModifier = 'A';
 
         while (false !== ($file = readdir($inboundFolderHandle))) {
-            $fileCreationTime = new \DateTime("now", new \DateTimeZone('PST8PDT'));
+            $fileCreationTime = new \DateTime('now', new \DateTimeZone('PST8PDT'));;
 
             try {
-                $path_parts = pathinfo($file);
-                $filename = $path_parts['filename'];
-                $date = str_replace('nacha-', "", $filename);
-                $fileCreationTime = new \DateTime(date("M-d-Y", $date, new \DateTimeZone('PST8PDT')));
-            } catch (\ErrorException $ex) {
-                $this->logger->crit('Unable to determine nacha file with path name');
-            }
-
-            try {
-                $statinfo = ssh2_sftp_stat($sftp, $inboundConnectionURL.'/'.$file);
+                $statinfo = ssh2_sftp_stat($sftp, $this->wellsFargoTransmissionInboundFolder.'/'.$file);
                 if (array_key_exists('mtime', $statinfo) && $statinfo['mtime'] !== null) {
                     $mtime = $statinfo['mtime'];
                     $fileCreationTime = new \DateTime(date("F d Y H:i:s.", $mtime, new \DateTimeZone('PST8PDT')));
@@ -243,10 +234,10 @@ class NACHAManager {
         $sftp = ssh2_sftp($connection);
 
         $returnsReportConnectionURL = 'ssh2.sftp://'.$sftp.'/'.$this->wellsFargoTransmissionReturnsReportFolder;
-        $originationFilesToProcess = $this->processWellsFargoReturnsReportForURLAndDates($returnsReportConnectionURL, $dateTimes);
+        $originationFilesToProcess = $this->processWellsFargoReturnsReportForURLAndDates($sftp, $returnsReportConnectionURL, $this->wellsFargoTransmissionReturnsReportFolder, $dateTimes);
         if($searchArchives) {
             $returnsReportArchiveConnectionURL = 'ssh2.sftp://'.$sftp.'/'.$this->wellsFargoTransmissionArchiveReturnsReportFolder;
-            $originationArchiveFilesToProcess = $this->processWellsFargoReturnsReportForURLAndDates($returnsReportArchiveConnectionURL, $dateTimes);
+            $originationArchiveFilesToProcess = $this->processWellsFargoReturnsReportForURLAndDates($sftp, $returnsReportArchiveConnectionURL, $this->wellsFargoTransmissionArchiveReturnsReportFolder, $dateTimes);
 
             if(count($originationFilesToProcess) == 0) {
                 $originationFilesToProcess = $originationArchiveFilesToProcess;
@@ -266,7 +257,7 @@ class NACHAManager {
      * @param array $dateTimes
      * @return array
      */
-    private function processWellsFargoReturnsReportForURLAndDates($returnsReportConnectionURL, array $dateTimes)
+    private function processWellsFargoReturnsReportForURLAndDates($sftp, $returnsReportConnectionURL, $folder, array $dateTimes)
     {
 
         $outboundFolderHandle = opendir($returnsReportConnectionURL);
@@ -295,13 +286,15 @@ class NACHAManager {
                     continue;
                 }
 
-                $contents = fread($sftpStream, filesize($returnsReportConnectionURL.'/'.$file));
+                $statinfo = ssh2_sftp_stat($sftp, $folder.'/'.$file);
+
+                $contents = fread($sftpStream, $statinfo['size']);
 
                 fclose($sftpStream);
 
                 $originationRejectFile->parseString($contents);
             } catch (Exception $e) {
-                $this->logger->critical('Could not read the NACHA report file from wells fargo: '. $e->getMessage().'  :  '.$returnsReportConnectionURL.'/'.$file);
+                $this->logger->critical('Could not read the NACHA report file from wells fargo: '. $e->getMessage().'  :  '.$folder.'/'.$file);
                 fclose($sftpStream);
                 continue;
             }
