@@ -124,7 +124,7 @@ class NACHAManager {
 
         if (!ssh2_auth_pubkey_file($connection, $this->wellsFargoTransmissionUsername, $this->wellsFargoTransmissionPublicKey, $this->wellsFargoTransmissionPrivateKey, $this->wellsFargoTransmissionPrivateKeyPassword)) {
             $this->logger->critical('Could not connect to send the NACHA file to wells fargo');
-            return;
+            throw new Exception("Could not connect to send the NACHA file to wells fargo");
         }
 
         $sftp = ssh2_sftp($connection);
