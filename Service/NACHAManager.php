@@ -153,10 +153,10 @@ class NACHAManager {
                 $statinfo = ssh2_sftp_stat($sftp, $this->wellsFargoTransmissionInboundFolder.'/'.$file);
                 if (array_key_exists('mtime', $statinfo) && $statinfo['mtime'] !== null) {
                     $mtime = $statinfo['mtime'];
-                    $fileCreationTime = new \DateTime(date("F d Y H:i:s.", $mtime, new \DateTimeZone('PST8PDT')));
+                    $fileCreationTime = new \DateTime(date("F d Y H:i:s.", $mtime), new \DateTimeZone('PST8PDT'));
                 }
             } catch (\ErrorException $ex) {
-                $this->logger->crit('Unable to determine nacha file with mtime');
+                $this->logger->crit('Unable to determine nacha file with mtime'.' '.$ex->getMessage());
             }
 
             $fileCreationTime->setTime(0, 0, 0);
@@ -167,8 +167,9 @@ class NACHAManager {
                 $fileModifier = "A";
             }
         }
-        
         $nachaFile->setFileModifier($fileModifier);
+
+        return;
 
         $nachaFileContents = $nachaFile->generateFileContents();
 
