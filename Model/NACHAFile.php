@@ -241,7 +241,7 @@ class NACHAFile {
         }
 
         $blocks = ceil(($linecount)/10);
-        $this->fileFooter = '9'.$this->formatNumeric('1', 6).$this->formatNumeric($blocks, 6).$this->formatNumeric($detailRecordCount, 8).$this->formatNumeric($routingHashTotal, 10).$this->formatNumeric(number_format($debitTotal, 2), 12).$this->formatNumeric(number_format($creditTotal, 2), 12).$this->formatText('', 39);
+        $this->fileFooter = '9'.$this->formatNumeric(count($this->batchItems), 6).$this->formatNumeric($blocks, 6).$this->formatNumeric($detailRecordCount, 8).$this->formatNumeric($routingHashTotal, 10).$this->formatNumeric(number_format($debitTotal, 2), 12).$this->formatNumeric(number_format($creditTotal, 2), 12).$this->formatText('', 39);
         if (strlen($this->fileFooter) == 94) {
             $this->validFileFooter = true;
         }
