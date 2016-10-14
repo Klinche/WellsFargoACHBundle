@@ -3,77 +3,78 @@
  * Created by PhpStorm.
  * User: daniel
  * Date: 1/23/15
- * Time: 9:52 AM
+ * Time: 9:54 AM
  */
 
-namespace WellsFargo\ACHBundle\Service;
+namespace WellsFargo\ACHBundle\Model;
 
-use Exception;
-use WellsFargo\ACHBundle\Model\NACHAFile;
-use WellsFargo\ACHBundle\Model\NACHAOriginationRejectFile;
+class NACHAFile {
 
+    const SAVINGS = 'SAVINGS';
+    const CHECKING = 'CHECKING';
 
-class NACHAManager {
+    const CHECKING_CREDIT = 22;
+    const CHECKING_PRENOTE_CREDIT = 23;
+    const CHECKING_DEBIT = 27;
+    const CHECKING_PRENOTE_DEBIT = 28;
 
-    /** @var  string  */
-    private $bankrt;
+    const SAVINGS_CREDIT = 32;
+    const SAVINGS_PRENOTE_CREDIT = 33;
+    const SAVINGS_DEBIT = 37;
+    const SAVINGS_PRENOTE_DEBIT = 38;
 
-    /** @var  string  */
+    const SERVICE_CLASS_CODE_200 = '200';
+    const SERVICE_CLASS_CODE_220 = '220';
+    const SERVICE_CLASS_CODE_225 = '225';
+
+    const SEC_PPD = 'PPD';
+    const SEC_CCD = 'CCD';
+    const SEC_CTX = 'CTX';
+
+    private $fileId;
     private $creditCompanyId;
-
-    /** @var  string  */
     private $debitCompanyId;
 
-    /** @var  string  */
-    private $applicationId;
-
-    /** @var  string  */
-    private $fileId;
-
-    /** @var  string  */
+    public $errorRecords = array();
+    public $processedRecords = array();
+    private $tranid = 0;
+    private $bankrt;
+    private $filemodifier = 'A';
     private $originatingBank;
-
-    /** @var  string  */
     private $companyName;
 
-    /** @var string $wellsFargoTransmissionHost */
-    private $wellsFargoTransmissionHost;
 
-    /** @var string $wellsFargoTransmissionUsername */
-    private $wellsFargoTransmissionUsername;
+    private $scc = self::SERVICE_CLASS_CODE_200;
+    private $sec = self::SEC_PPD;
+    private $companyEntryDescription = 'PAYMENT';
+    private $companyDescriptionDate;
+    private $effectiveEntryDate;
+    private $fileHeader = '';
+    public $validFileHeader = false;
+    private $fileFooter = '';
+    public $validFileFooter = false;
+    private $recordsize = '094';
+    private $blockingfactor = '10';
+    private $formatcode = '1';
+    private $referencecode = '        ';
+    public $fileContents = '';
+    public $discretionaryData = '';
+    private $applicationId = '';
+    private $timezone = 'PST8PDT';
+    private $creationDate = '';
 
-    /** @var string $wellsFargoTransmissionPrivateKey */
-    private $wellsFargoTransmissionPrivateKey;
+    private $companyDiscretionaryData = '';
 
-    /** @var string $wellsFargoTransmissionPrivateKeyPassword */
-    private $wellsFargoTransmissionPrivateKeyPassword;
-
-    /** @var string $wellsFargoTransmissionPublicKey */
-    private $wellsFargoTransmissionPublicKey;
-
-    /** @var string $wellsFargoTransmissionInboundFolder */
-    private $wellsFargoTransmissionInboundFolder;
-
-    /** @var string $wellsFargoTransmissionOutboundFolder */
-    private $wellsFargoTransmissionOutboundFolder;
-
-    /** @var string $wellsFargoTransmissionReturnsReportFolder */
-    private $wellsFargoTransmissionReturnsReportFolder;
-
-    /** @var string $wellsFargoTransmissionArchiveInboundFolder */
-    private $wellsFargoTransmissionArchiveInboundFolder;
-
-    /** @var string $wellsFargoTransmissionArchiveOutboundFolder */
-    private $wellsFargoTransmissionArchiveOutboundFolder;
-
-    /** @var string $wellsFargoTransmissionArchiveReturnsReportFolder */
-    private $wellsFargoTransmissionArchiveReturnsReportFolder;
+    /**
+     * @var NACHABatch[]
+     */
+    private $batchItems = array();
 
 
-    /** @var $logger \Monolog\Logger */
-    private $logger;
 
-    public function __construct($routingNumber, $creditCompanyId, $debitCompanyId, $applicationId, $fileId, $originatingBank, $companyName, $wellsFargoTransmissionHost, $wellsFargoTransmissionUsername, $wellsFargoTransmissionPrivateKey, $wellsFargoTransmissionPrivateKeyPassword, $wellsFargoTransmissionPublicKey, $wellsFargoTransmissionInboundFolder, $wellsFargoTransmissionOutboundFolder, $wellsFargoTransmissionReturnsReportFolder, $wellsFargoTransmissionArchiveInboundFolder, $wellsFargoTransmissionArchiveOutboundFolder, $wellsFargoTransmissionArchiveReturnsReportFolder,  $logger)
+    /**
+     */
+    public function __construct($routingNumber, $creditCompanyId, $debitCompanyId, $applicationId, $fileId, $originatingBank, $companyName)
     {
         $this->bankrt = $routingNumber;
         $this->creditCompanyId = $creditCompanyId;
@@ -82,236 +83,505 @@ class NACHAManager {
         $this->fileId = $fileId;
         $this->originatingBank = $originatingBank;
         $this->companyName = $companyName;
-        $this->logger = $logger;
-
-        $this->wellsFargoTransmissionHost = $wellsFargoTransmissionHost;
-        $this->wellsFargoTransmissionUsername = $wellsFargoTransmissionUsername;
-        $this->wellsFargoTransmissionPrivateKey = $wellsFargoTransmissionPrivateKey;
-        $this->wellsFargoTransmissionPrivateKeyPassword = $wellsFargoTransmissionPrivateKeyPassword;
-        $this->wellsFargoTransmissionPublicKey = $wellsFargoTransmissionPublicKey;
-
-        $this->wellsFargoTransmissionInboundFolder = $wellsFargoTransmissionInboundFolder;
-        $this->wellsFargoTransmissionOutboundFolder = $wellsFargoTransmissionOutboundFolder;
-        $this->wellsFargoTransmissionReturnsReportFolder = $wellsFargoTransmissionReturnsReportFolder;
-
-        $this->wellsFargoTransmissionArchiveInboundFolder = $wellsFargoTransmissionArchiveInboundFolder;
-        $this->wellsFargoTransmissionArchiveOutboundFolder = $wellsFargoTransmissionArchiveOutboundFolder;
-        $this->wellsFargoTransmissionArchiveReturnsReportFolder = $wellsFargoTransmissionArchiveReturnsReportFolder;
     }
 
     /**
-     * Generates a fresh nacha file to use.
+     * Generates the nacha file contents
      *
-     * @return NACHAFile
-     */
-    public function createNACHAFile() {
-        return new NACHAFile($this->bankrt, $this->creditCompanyId, $this->debitCompanyId, $this->applicationId, $this->fileId, $this->originatingBank, $this->companyName);
-    }
-
-
-    /**
-     * Uploads any ach payments that we have waiting for the day. This is called from the command line.
-     *
+     * @param bool $fileModifier
      * @return string
-     * @throws Exception
+     * @throws \Exception
      */
-    public function uploadNACHAFile(NACHAFile $nachaFile)
+    public function generateFileContents($fileModifier = false)
     {
-        $this->logger->notice('Starting Upload of Wells Fargo NACHA File');
+        if ($fileModifier) {
+            $this->setFileModifier($fileModifier);
+        }
+        $this->createFileHeader();
 
+        $batchLines = "";
 
-        $connection = ssh2_connect($this->wellsFargoTransmissionHost, 22, array('hostkey'=>'ssh-rsa'));
+        /** @var NACHABatch $batch */
+        foreach($this->batchItems as $batch) {
+            $batch->createBatchHeader();
+            $batch->createBatchFooter();
 
-        if (!ssh2_auth_pubkey_file($connection, $this->wellsFargoTransmissionUsername, $this->wellsFargoTransmissionPublicKey, $this->wellsFargoTransmissionPrivateKey, $this->wellsFargoTransmissionPrivateKeyPassword)) {
-            $this->logger->critical('Could not connect to send the NACHA file to wells fargo');
-            throw new Exception("Could not connect to send the NACHA file to wells fargo");
+            if(!$batch->validBatchFooter || !$batch->validBatchHeader) {
+                throw new \Exception("Invalid batch section Header:   ".$batch->getBatchHeader()." Footer:   ".$batch->getBatchFooter());
+
+            }
+            $batchLines = $batchLines."\n".$batch->getBatchHeader()."\n".$batch->getBatchLines().$batch->getBatchFooter();
         }
 
-        $sftp = ssh2_sftp($connection);
-
-        $inboundConnectionURL = 'ssh2.sftp://'.$sftp.'/'.$this->wellsFargoTransmissionInboundFolder;
-        $inboundFolderHandle = opendir($inboundConnectionURL);
-
-
-        $now = new \DateTime('now', new \DateTimeZone('PST8PDT'));
-
-        $fivePm = new \DateTime('now', new \DateTimeZone('PST8PDT'));
-        $fivePm->setTime(17, 0, 0);
-
-        if ($now > $fivePm) {
-            $now = $now->add(new \DateInterval('P1D'));
+        $this->createFileFooter();
+        if (!$this->validFileHeader) {
+            throw new \Exception('Invalid File Header: '.$this->fileHeader);
         }
-
-        $now->setTime(0, 0, 0);
-
-        $fileModifier = 'A';
-
-        while (false !== ($file = readdir($inboundFolderHandle))) {
-            $fileCreationTime = new \DateTime('now', new \DateTimeZone('PST8PDT'));;
-
-            try {
-                $statinfo = ssh2_sftp_stat($sftp, $this->wellsFargoTransmissionInboundFolder.'/'.$file);
-                if (array_key_exists('mtime', $statinfo) && $statinfo['mtime'] !== null) {
-                    $mtime = $statinfo['mtime'];
-                    $fileCreationTime = new \DateTime(date("F d Y H:i:s.", $mtime), new \DateTimeZone('PST8PDT'));
-                }
-            } catch (\ErrorException $ex) {
-                $this->logger->crit('Unable to determine nacha file with mtime'.' '.$ex->getMessage());
-            }
-
-            $fileCreationTime->setTime(0, 0, 0);
-            if ($fileCreationTime == $now) {
-                $fileModifier++;
-            }
-            if ($fileModifier == 'AA') {
-                $fileModifier = "A";
-            }
+        if (!$this->validFileFooter) {
+            throw new \Exception('Invalid File Footer: '.$this->fileFooter);
         }
-        $nachaFile->setFileModifier($fileModifier);
-
-        return;
-
-        $nachaFileContents = $nachaFile->generateFileContents();
-
-        if (is_null($nachaFileContents)) {
-            $this->logger->notice('The nacha file had no contents.');
-            return;
-        }
-
-        $sftpStream = @fopen($inboundConnectionURL.'/nacha-'.date('M-d-Y').'.txt', 'w');
-
-        try {
-            if (!$sftpStream) {
-                throw new Exception("Could not open remote sftp file for NACHA writing.");
-            }
-
-            if (@fwrite($sftpStream, $nachaFileContents) === false) {
-                throw new Exception("Could not send data from the nacha file");
-            }
-
-            fclose($sftpStream);
-        } catch (Exception $e) {
-            $this->logger->critical('Could not send the NACHA file to wells fargo: '. $e->getMessage());
-            fclose($sftpStream);
-            return;
-        }
-
-        $this->logger->notice('Finished Upload of Wells Fargo NACHA File');
+        return $this->fileHeader.$batchLines."\n".$this->fileFooter;
     }
 
+    /**
+     * Takes money from someone else's account and transfers it into ours.
+     *
+     * @param  NachaPaymentInfo $paymentInfo
+     * @return bool
+     */
+    public function addDebit(NachaPaymentInfo $paymentInfo, $secType = self::SEC_PPD)
+    {
+        if (is_null($paymentInfo)) {
+            return false;
+        }
+
+        if (is_null($paymentInfo->getTransCode())) {
+            if (!is_null($paymentInfo->getAccountType())) {
+                if ($paymentInfo->getAccountType() == self::CHECKING) {
+                    $paymentInfo->setTransCode(self::CHECKING_DEBIT);
+                } elseif ($paymentInfo->getAccountType() == self::SAVINGS) {
+                    $paymentInfo->setTransCode(self::SAVINGS_DEBIT);
+                } else {
+                    return false;
+                }
+            } else {
+                $paymentInfo->setTransCode(self::CHECKING_DEBIT);
+            }
+        }
+        $this->addDetailLine($paymentInfo, $secType);
+
+        return true;
+    }
+
+    /**
+     * Takes moeny from our account and transfers it into someone elses
+     *
+     * @param  NachaPaymentInfo $paymentInfo
+     * @return bool
+     */
+    public function addCredit(NachaPaymentInfo $paymentInfo, $secType = self::SEC_PPD)
+    {
+        if (is_null($paymentInfo)) {
+            return false;
+        }
+        if (is_null($paymentInfo->getTransCode())) {
+            if (!is_null($paymentInfo->getAccountType())) {
+                if ($paymentInfo->getAccountType() == self::CHECKING) {
+                    $paymentInfo->setTransCode(self::CHECKING_CREDIT);
+                } elseif ($paymentInfo->getAccountType() == self::SAVINGS) {
+                    $paymentInfo->setTransCode(self::SAVINGS_CREDIT);
+                } else {
+                    return false;
+                }
+            } else {
+                $paymentInfo->setTransCode(self::CHECKING_CREDIT);
+            }
+        }
+        return $this->addDetailLine($paymentInfo, $secType);
+    }
+
+    private function addDetailLine(NachaPaymentInfo $paymentInfo, $secType)
+    {
+        if (is_null($paymentInfo->getIndividualId()) || is_null($paymentInfo->getTotalAmount()) || is_null($paymentInfo->getBankAccountNumber()) || is_null($paymentInfo->getRoutingNumber()) || is_null($paymentInfo->getIndividualName()) || is_null($paymentInfo->getAccountType())) {
+            return false;
+        }
+        $paymentInfo->setTranId($this->tranid+1);
+
+        $transCode = $paymentInfo->getTransCode();
+
+        $type = $secType.'_'.$transCode;
+
+        if(!isset($this->batchItems[$type])) {
+            $this->batchItems[$type] = new NACHABatch($this, $secType, $transCode, count($this->batchItems) + 1);
+        }
+
+        $batchFile = $this->batchItems[$type];
+
+        if ($batchFile->createDetailRecord($paymentInfo)) {
+            array_push($this->processedRecords, $paymentInfo);
+            $this->tranid++;
+
+            return true;
+        } else {
+            $paymentInfo->setTranId(false);
+            array_push($this->errorRecords, $paymentInfo);
+
+            return false;
+        }
+    }
+
+
+    private function createFileHeader()
+    {
+        $this->fileHeader = '101 '.$this->bankrt.$this->fileId.$this->creationDate.$this->filemodifier.$this->recordsize.$this->blockingfactor.$this->formatcode.$this->formatText($this->originatingBank, 23).$this->formatText($this->companyName, 23).$this->formatText($this->referencecode, 8);
+        if (strlen($this->fileHeader) >=86  && strlen($this->fileHeader) <= 94) {
+            $this->validFileHeader = true;
+        }
+
+        return $this;
+    }
+
+
+
+    private function createFileFooter()
+    {
+        $linecount = 2;
+        $detailRecordCount = 0;
+        $debitTotal = 0;
+        $creditTotal = 0;
+        $routingHashTotal = 0;
+
+        /** @var NACHABatch $batch */
+        foreach($this->batchItems as $batch) {
+            $linecount = $linecount + 2 + $batch->getDetailRecordCount();
+            $detailRecordCount = $detailRecordCount + $batch->getDetailRecordCount();
+            $debitTotal = $debitTotal + $batch->getDebitTotal();
+            $creditTotal = $creditTotal + $batch->getCreditTotal();
+            $routingHashTotal = $routingHashTotal + $batch->getRoutingHash();
+        }
+
+        $blocks = ceil(($linecount)/10);
+        $this->fileFooter = '9'.$this->formatNumeric(count($this->batchItems), 6).$this->formatNumeric($blocks, 6).$this->formatNumeric($detailRecordCount, 8).$this->formatNumeric($routingHashTotal, 10).$this->formatNumeric(number_format($debitTotal, 2), 12).$this->formatNumeric(number_format($creditTotal, 2), 12).$this->formatText('', 39);
+        if (strlen($this->fileFooter) == 94) {
+            $this->validFileFooter = true;
+        }
+//        // Add any additional '9' lines to get something evenly divisable by 10.
+//        $fillersToAdd = ($blocks*10)-$linecount;
+//        for ($i = 0; $i<$fillersToAdd; $i++) {
+//            $this->fileFooter .= "\n".str_pad('', 94, '9');
+//        }
+
+        return $this;
+    }
+
+    public function specialDate($format, $date = null)
+    {
+        if (is_null($date)) {
+            $date = new \DateTime('now', new \DateTimeZone('PST8PDT'));
+        }
+
+        $date->setTimezone(new \DateTimeZone('PST8PDT'));
+
+        return $date->format($format);
+    }
+
+    public function formatText($txt, $spaces)
+    {
+        return substr(str_pad(strtoupper($txt), $spaces, ' ', STR_PAD_RIGHT), 0, $spaces);
+    }
+
+    public function formatNumeric($nums, $spaces)
+    {
+        return substr(str_pad(str_replace(array('.', ','), '', (string) $nums), $spaces, '0', STR_PAD_LEFT), ($spaces)*-1);
+    }
+
+
+    #region "Main File"
+
+    public function setFileModifier($fileModifier)
+    {
+        $this->filemodifier = $fileModifier;
+
+        return $this;
+    }
+
+    public function getFileModifier()
+    {
+        return $this->filemodifier;
+    }
+
+    public function setFileCreationDate($creationDate)
+    {
+        $this->creationDate = $this->specialDate('ymdHi', $creationDate);
+
+        return $this;
+    }
+
+    public function getFileCreationDate()
+    {
+        return $this->creationDate;
+    }
+
+    public function setServiceClassCode($scc)
+    {
+        $this->scc = $scc;
+
+        return $this;
+    }
+
+    public function setSECCode($sec)
+    {
+        $this->sec = $sec;
+
+        return $this;
+    }
+
+    public function setCompanyDiscretionaryData($batchinfo)
+    {
+        $this->companyDiscretionaryData = $batchinfo;
+
+        return $this;
+    }
+
+    public function setCompanyEntryDescription($des = false, $date = false)
+    {
+        if ($des) {
+            $this->companyEntryDescription = $des;
+        }
+        if ($date) {
+            $this->companyDescriptionDate = $this->specialDate('M d', $date);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param $timezone
+     * @return $this
+     */
+    public function setTimezone($timezone)
+    {
+        $this->timezone = $timezone;
+        return $this;
+    }
+
+    public function setEffectiveEntryDate($date)
+    {
+        $this->effectiveEntryDate = $this->specialDate('ymd', $date);
+
+        return $this;
+    }
+
+    public function setPaymentTypeCode($type)
+    {
+        $this->discretionaryData = $type;
+
+        return $this;
+    }
 
     #endregion
 
-    #region "Reports"
+    #region "Data"
 
     /**
-     * @param \DateTime $dateTime
-     * @param bool $searchArchives
+     * @return string
      */
-    public function processWellsFargoReportForDateTime(\DateTime $dateTime, $searchArchives = false)
+    public function getCompanyDiscretionaryData()
     {
-        $this->processWellsFargoReportForDateTimes(array($dateTime), $searchArchives);
+        return $this->companyDiscretionaryData;
     }
 
     /**
-     *  Processes the Wells Fargo report for specific times.
-     *
-     * @param array $dateTimes
-     * @param bool $searchArchives Whether or not to search archived files
+     * @return string
+     */
+    public function getFileId()
+    {
+        return $this->fileId;
+    }
+
+
+    /**
      * @return array
      */
-    public function processWellsFargoReportForDateTimes(array $dateTimes, $searchArchives = false)
+    public function getErrorRecords()
     {
-        $this->logger->notice('Starting Processing of Wells Fargo NACHA Report');
+        return $this->errorRecords;
+    }
 
+    /**
+     * @return array
+     */
+    public function getProcessedRecords()
+    {
+        return $this->processedRecords;
+    }
 
-        $connection = ssh2_connect($this->wellsFargoTransmissionHost, 22, array('hostkey'=>'ssh-rsa'));
+    /**
+     * @return int
+     */
+    public function getTranid()
+    {
+        return $this->tranid;
+    }
 
-        if (!ssh2_auth_pubkey_file($connection, $this->wellsFargoTransmissionUsername, $this->wellsFargoTransmissionPublicKey, $this->wellsFargoTransmissionPrivateKey, $this->wellsFargoTransmissionPrivateKeyPassword)) {
-            $this->logger->critical('Could not connect to grab the report file from wells fargo');
-            return null;
-        }
+    /**
+     * @return string
+     */
+    public function getBankrt()
+    {
+        return $this->bankrt;
+    }
 
-        $sftp = ssh2_sftp($connection);
+    /**
+     * @return string
+     */
+    public function getOriginatingBank()
+    {
+        return $this->originatingBank;
+    }
 
-        $returnsReportConnectionURL = 'ssh2.sftp://'.$sftp.'/'.$this->wellsFargoTransmissionReturnsReportFolder;
-        $originationFilesToProcess = $this->processWellsFargoReturnsReportForURLAndDates($sftp, $returnsReportConnectionURL, $this->wellsFargoTransmissionReturnsReportFolder, $dateTimes);
-        if($searchArchives) {
-            $returnsReportArchiveConnectionURL = 'ssh2.sftp://'.$sftp.'/'.$this->wellsFargoTransmissionArchiveReturnsReportFolder;
-            $originationArchiveFilesToProcess = $this->processWellsFargoReturnsReportForURLAndDates($sftp, $returnsReportArchiveConnectionURL, $this->wellsFargoTransmissionArchiveReturnsReportFolder, $dateTimes);
-
-            if(count($originationFilesToProcess) == 0) {
-                $originationFilesToProcess = $originationArchiveFilesToProcess;
-            } else if(count($originationArchiveFilesToProcess) != 0) {
-                array_merge($originationFilesToProcess, $originationArchiveFilesToProcess);
-            }
-        }
-
-        $this->logger->notice('Finished Processing of Wells Fargo NACHA Report');
-
-        return $originationFilesToProcess;
+    /**
+     * @return string
+     */
+    public function getCreditCompanyId()
+    {
+        return $this->creditCompanyId;
     }
 
 
     /**
-     * @param $returnsReportConnectionURL
-     * @param array $dateTimes
-     * @return array
+     * @return string
      */
-    private function processWellsFargoReturnsReportForURLAndDates($sftp, $returnsReportConnectionURL, $folder, array $dateTimes)
+    public function getDebitCompanyId()
     {
-
-        $outboundFolderHandle = opendir($returnsReportConnectionURL);
-
-        $newDateTimes = array();
-
-        /** @var \DateTime $dateTime */
-        foreach($dateTimes as $dateTime) {
-            $time = new \DateTime($dateTime);
-            $time->setTimezone(new \DateTimeZone('PST8PDT'));
-            $time->setTime(0, 0, 0);
-            $newDateTimes[] = $time;
-        }
-        $dateTimes = $newDateTimes;
-
-        $originationFilesToProcess = array();
-
-        while (false !== ($file = readdir($outboundFolderHandle))) {
-            $originationRejectFile = new NACHAOriginationRejectFile();
-
-            $sftpStream = @fopen($returnsReportConnectionURL.'/'.$file, 'r');
-
-            try {
-                if (!$sftpStream) {
-                    $this->logger->critical('Could not open remote sftp file for NACHA report reading: '.$returnsReportConnectionURL.'/'.$file);
-                    continue;
-                }
-
-                $statinfo = ssh2_sftp_stat($sftp, $folder.'/'.$file);
-
-                $contents = fread($sftpStream, $statinfo['size']);
-
-                fclose($sftpStream);
-
-                $originationRejectFile->parseString($contents);
-            } catch (Exception $e) {
-                $this->logger->critical('Could not read the NACHA report file from wells fargo: '. $e->getMessage().'  :  '.$folder.'/'.$file);
-                fclose($sftpStream);
-                continue;
-            }
-
-            $creationDate = $originationRejectFile->getFileHeader()->getFileCreationDateTime();
-            $creationDate->setTime(0, 0, 0);
-
-            if(in_array($creationDate, $dateTimes)) {
-                $originationFilesToProcess[] = $originationRejectFile;
-            }
-        }
-
-        closedir($outboundFolderHandle);
-
-        return $originationFilesToProcess;
+        return $this->debitCompanyId;
     }
+
+    /**
+     * @return string
+     */
+    public function getCompanyName()
+    {
+        return $this->companyName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getScc()
+    {
+        return $this->scc;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSec()
+    {
+        return $this->sec;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCompanyEntryDescription()
+    {
+        return $this->companyEntryDescription;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCompanyDescriptionDate()
+    {
+        return $this->companyDescriptionDate;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEffectiveEntryDate()
+    {
+        return $this->effectiveEntryDate;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileHeader()
+    {
+        return $this->fileHeader;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isValidFileHeader()
+    {
+        return $this->validFileHeader;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileFooter()
+    {
+        return $this->fileFooter;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isValidFileFooter()
+    {
+        return $this->validFileFooter;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRecordsize()
+    {
+        return $this->recordsize;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBlockingfactor()
+    {
+        return $this->blockingfactor;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFormatcode()
+    {
+        return $this->formatcode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getReferencecode()
+    {
+        return $this->referencecode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileContents()
+    {
+        return $this->fileContents;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDiscretionaryData()
+    {
+        return $this->discretionaryData;
+    }
+
+    /**
+     * @return string
+     */
+    public function getApplicationId()
+    {
+        return $this->applicationId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTimezone()
+    {
+        return $this->timezone;
+    }
+
+    #endregion
 
 
 }
