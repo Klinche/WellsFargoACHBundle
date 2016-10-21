@@ -119,8 +119,12 @@ class NACHAManager {
     {
         $this->logger->notice('Starting Upload of Wells Fargo NACHA File');
 
-
         $connection = ssh2_connect($this->wellsFargoTransmissionHost, 22, array('hostkey'=>'ssh-rsa'));
+
+        if (!$connection) {
+            $this->logger->critical('Could not connect to host to send the NACHA file to wells fargo');
+            throw new Exception("Could not connect to host to send the NACHA file to wells fargo");
+        }
 
         if (!ssh2_auth_pubkey_file($connection, $this->wellsFargoTransmissionUsername, $this->wellsFargoTransmissionPublicKey, $this->wellsFargoTransmissionPrivateKey, $this->wellsFargoTransmissionPrivateKeyPassword)) {
             $this->logger->critical('Could not connect to send the NACHA file to wells fargo');
