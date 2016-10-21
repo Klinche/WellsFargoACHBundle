@@ -169,8 +169,6 @@ class NACHAManager {
         }
         $nachaFile->setFileModifier($fileModifier);
 
-        return;
-
         $nachaFileContents = $nachaFile->generateFileContents();
 
         if (is_null($nachaFileContents)) {
